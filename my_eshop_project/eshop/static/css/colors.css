@@ -1,0 +1,96 @@
+/* ======================================================
+   Mitsubishi-Inspired Color Palette + Usage Examples
+   ====================================================== */
+
+/* 1) Define Custom Properties (CSS Variables) */
+:root {
+    --color-red: #ff0000;          /* Mitsubishi Red        */
+    --color-navy: #002b49;         /* Mitsubishi Navy       */
+    --color-marine: #004d8c;       /* Lighter navy accent   */
+    --color-light-neutral: #f5f6f7;/* Off-white background  */
+    --color-mid-gray: #888888;     /* Secondary text color  */
+    --color-white: #ffffff;        /* Standard White        */
+  }
+  
+  /* 2) Base Element Styles (Optional) */
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Roboto Slab", serif; /* or your chosen font */
+    background-color: var(--color-light-neutral);
+    color: #333; /* dark gray for body text */
+  }
+  
+  /* 3) Example Classes Demonstrating Usage */
+  
+  /* A top header or nav bar using navy + white text */
+  .header-bar {
+    background-color: var(--color-navy);
+    color: var(--color-white);
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  /* A secondary top bar or gradient usage with marine & navy */
+  .header-bar-gradient {
+    background: linear-gradient(90deg, var(--color-navy), var(--color-marine));
+    color: var(--color-white);
+    padding: 1rem;
+    text-align: center;
+  }
+  
+  /* Buttons: 
+     - .btn-red for high-impact calls to action 
+     - .btn-navy for a more subdued brand look
+  */
+  .btn {
+    display: inline-block;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    text-align: center;
+    transition: transform 0.3s;
+    color: var(--color-white);
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+  
+  .btn-red {
+    background-color: var(--color-red);
+  }
+  .btn-red:hover {
+    opacity: 0.9; /* subtle change, or a gradient if you prefer */
+  }
+  
+  .btn-navy {
+    background-color: var(--color-navy);
+  }
+  .btn-navy:hover {
+    background-color: var(--color-marine);
+  }
+  
+  /* "View all" or "Buy now" button with gradient red (OPTIONAL) */
+  .btn-red-gradient {
+    background: linear-gradient(90deg, var(--color-red), #ff4444);
+  }
+  .btn-red-gradient:hover {
+    background: linear-gradient(90deg, #ff4444, var(--color-red));
+    opacity: 0.95;
+  }
+  
+  /* White-board container with subtle shadow */
+  .white-board {
+    background-color: var(--color-white);
+    border-radius: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Secondary text or placeholders in mid-gray */
+  .secondary-text {
+    color: var(--color-mid-gray);
+  }
+  

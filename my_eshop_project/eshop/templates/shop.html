@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+
+  <!-- Banner Section -->
+  <div class="row mb-4" style="border-radius: .5rem; overflow: hidden;">
+    <div class="col-12 p-0">
+      <!-- Replace 'images/banner.jpg' with your actual banner path if different -->
+      <img src="{% static 'images/banner.jpg' %}" alt="Exclusive Collection Banner" style="width:100%; height:auto;">
+    </div>
+  </div>
+
+  <h1 class="my-4 text-center">Our Latest Products</h1>
+  <div class="row justify-content-center">
+    {% for product in products %}
+      <div class="col-sm-6 col-md-4 col-lg-3 mb-4">
+        <div class="card h-100 text-center" style="border: none; box-shadow: 0 0 8px rgba(0, 0, 0, 0.1); border-radius: .5rem;">
+          <div class="card-body d-flex flex-column align-items-center justify-content-center">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                   style="height:200px; width:100%; object-fit:contain; background-color:#f9f9f9; border-radius:.5rem;"
+                   class="mb-3">
+            {% else %}
+              <img src="{% static 'images/default-placeholder.png' %}" alt="No image"
+                   style="height:200px; width:100%; object-fit:contain; background-color:#f9f9f9; border-radius:.5rem;"
+                   class="mb-3">
+            {% endif %}
+
+            <h6 class="mb-1" style="font-weight:600;">{{ product.name }}</h6>
+
+            <!-- Example Original Price (crossed out) -->
+            <p class="text-muted mb-0" style="text-decoration: line-through;">৳2250</p>
+
+            <!-- Example Discounted Price -->
+            <p style="font-size:1.2rem; font-weight:bold; margin-bottom:0.75rem;">৳1999</p>
+
+            <a href="{% url 'product-detail' product.id %}" class="btn btn-warning px-4" style="border-radius:1.5rem;">
+              Buy Now
+            </a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <p class="text-center">No products available.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

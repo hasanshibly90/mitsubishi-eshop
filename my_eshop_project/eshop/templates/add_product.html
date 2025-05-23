@@ -1,0 +1,131 @@
+<!-- templates/add_product.html (example) -->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Add Product</title>
+</head>
+<body>
+
+<h1>Add Product</h1>
+<form id="addProductForm">
+  <label>Top-level Category</label>
+  <select id="topCategory">
+    <option value="">--Select--</option>
+  </select>
+
+  <br/><br/>
+
+  <label>Sub-category</label>
+  <select id="subCategory">
+    <option value="">--Select--</option>
+  </select>
+
+  <br/><br/>
+
+  <label>Sub-sub-category</label>
+  <select id="subSubCategory">
+    <option value="">--Select--</option>
+  </select>
+
+  <br/><br/>
+
+  <label>Product Name</label>
+  <input type="text" id="productName" /><br/><br/>
+
+  <label>SKU</label>
+  <input type="text" id="sku" /><br/><br/>
+
+  <label>Price</label>
+  <input type="number" step="0.01" id="price" /><br/><br/>
+
+  <button type="submit">Save</button>
+</form>
+
+
+<script>
+// 1) On page load, fetch top-level categories from /api/categories/
+document.addEventListener('DOMContentLoaded', () => {
+  const topCatSelect = document.getElementById('topCategory');
+  const subCatSelect = document.getElementById('subCategory');
+  const subSubSelect = document.getElementById('subSubCategory');
+
+  // Helper to fetch and populate a select
+  function populateSelect(selectEl, items) {
+    selectEl.innerHTML = '<option value="">--Select--</option>';
+    items.forEach(obj => {
+      const opt = document.createElement('option');
+      opt.value = obj.id;
+      opt.textContent = obj.name;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  // Fetch top-level categories
+  fetch('/api/categories/')
+    .then(res => res.json())
+    .then(data => {
+      populateSelect(topCatSelect, data);
+    });
+
+  // When topCategory changes, fetch subcategories
+  topCatSelect.addEventListener('change', e => {
+    const catId = e.target.value;
+    // Reset subCategory + subSubCategory
+    populateSelect(subCatSelect, []);
+    populateSelect(subSubSelect, []);
+    if (catId) {
+      fetch(`/api/categories/${catId}/children/`)
+        .then(res => res.json())
+        .then(data => {
+          populateSelect(subCatSelect, data);
+        });
+    }
+  });
+
+  // When subCategory changes, fetch sub-sub categories
+  subCatSelect.addEventListener('change', e => {
+    const subCatId = e.target.value;
+    populateSelect(subSubSelect, []);
+    if (subCatId) {
+      fetch(`/api/categories/${subCatId}/children/`)
+        .then(res => res.json())
+        .then(data => {
+          populateSelect(subSubSelect, data);
+        });
+    }
+  });
+
+  // On form submit => we take subSubCategory if any, else subCategory if any, else topCategory
+  const form = document.getElementById('addProductForm');
+  form.addEventListener('submit', (evt) => {
+    evt.preventDefault();
+    // Final category is the lowest one they selected
+    const finalCatId = subSubSelect.value || subCatSelect.value || topCatSelect.value;
+
+    const productData = {
+      name: document.getElementById('productName').value,
+      sku: document.getElementById('sku').value,
+      price: parseFloat(document.getElementById('price').value || 0),
+      category: finalCatId // the ID referencing sub-sub-cat ideally
+    };
+
+    // POST to /api/products/
+    fetch('/api/products/', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(productData)
+    })
+      .then(res => {
+        if (!res.ok) throw new Error('Error creating product');
+        return res.json();
+      })
+      .then(created => {
+        alert('Product created with ID=' + created.id);
+      })
+      .catch(err => alert(err));
+  });
+});
+</script>
+
+</body>
+</html>

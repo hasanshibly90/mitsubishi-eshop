@@ -1,0 +1,11 @@
+/* Force the filter block to the bottom-left corner */
+.changelist-filter {
+    float: left;            /* or position: absolute; bottom: 0; left: 0; etc. */
+    margin-top: 2rem;       /* some spacing */
+    width: 200px;           /* a fixed width so it doesn't overlap content */
+  }
+  /* If you need to shift the main results to the right so they don't overlap */
+  #changelist {
+    margin-left: 220px;
+  }
+  

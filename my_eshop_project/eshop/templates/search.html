@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container mt-4">
+
+  <!-- Heading -->
+  <h1 class="text-center mb-4">Search Results</h1>
+
+  <!-- Search & Filter Form Card -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <form method="get" action="{% url 'search' %}">
+        <!-- Text Search -->
+        <div class="mb-3">
+          <label for="q" class="visually-hidden">Search by SKU</label>
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0">
+              <i class="bi bi-search"></i>
+            </span>
+            <input
+              type="text"
+              name="q"
+              id="q"
+              class="form-control border-start-0"
+              placeholder="Search by SKU"
+              value="{{ query }}"
+            >
+          </div>
+        </div>
+
+        <!-- Single row for 5 dropdowns + Filter & Reset buttons -->
+        <div class="row g-2 align-items-end">
+          <!-- VFD Series -->
+          <div class="col-md-2">
+            <label for="vfd_series" class="form-label fw-semibold">VFD Series</label>
+            <select name="vfd_series" id="vfd_series" class="form-select">
+              <option value="">-- All --</option>
+              <option value="D SERIES" {% if selected_vfd_series == "D SERIES" %}selected{% endif %}>D SERIES</option>
+              <option value="E SERIES" {% if selected_vfd_series == "E SERIES" %}selected{% endif %}>E SERIES</option>
+              <option value="F SERIES" {% if selected_vfd_series == "F SERIES" %}selected{% endif %}>F SERIES</option>
+              <option value="A SERIES" {% if selected_vfd_series == "A SERIES" %}selected{% endif %}>A SERIES</option>
+            </select>
+          </div>
+
+          <!-- Supply Voltage -->
+          <div class="col-md-2">
+            <label for="supply_voltage_ac" class="form-label fw-semibold">Supply Voltage</label>
+            <select name="supply_voltage_ac" id="supply_voltage_ac" class="form-select">
+              <option value="">-- All --</option>
+              <option value="1 PHASE 200VAC" {% if selected_supply_voltage_ac == "1 PHASE 200VAC" %}selected{% endif %}>1 PHASE 200VAC</option>
+              <option value="3 PHASE 200VAC" {% if selected_supply_voltage_ac == "3 PHASE 200VAC" %}selected{% endif %}>3 PHASE 200VAC</option>
+              <option value="3 PHASE 400VAC" {% if selected_supply_voltage_ac == "3 PHASE 400VAC" %}selected{% endif %}>3 PHASE 400VAC</option>
+            </select>
+          </div>
+
+          <!-- Rated Power (kW) -->
+          <div class="col-md-2">
+            <label for="rated_power_hp" class="form-label fw-semibold">Rated Power (kW)</label>
+            <select name="rated_power_hp" id="rated_power_hp" class="form-select">
+              <option value="">-- All --</option>
+              <option value="0.4"   {% if selected_rated_power_hp == "0.4"   %}selected{% endif %}>0.4kW</option>
+              <option value="0.75"  {% if selected_rated_power_hp == "0.75"  %}selected{% endif %}>0.75kW</option>
+              <option value="1.5"   {% if selected_rated_power_hp == "1.5"   %}selected{% endif %}>1.5kW</option>
+              <option value="2.2"   {% if selected_rated_power_hp == "2.2"   %}selected{% endif %}>2.2kW</option>
+              <option value="3.7"   {% if selected_rated_power_hp == "3.7"   %}selected{% endif %}>3.7kW</option>
+              <option value="5.5"   {% if selected_rated_power_hp == "5.5"   %}selected{% endif %}>5.5kW</option>
+              <option value="7.5"   {% if selected_rated_power_hp == "7.5"   %}selected{% endif %}>7.5kW</option>
+              <option value="11"    {% if selected_rated_power_hp == "11"    %}selected{% endif %}>11kW</option>
+              <option value="15"    {% if selected_rated_power_hp == "15"    %}selected{% endif %}>15kW</option>
+              <option value="18.5"  {% if selected_rated_power_hp == "18.5"  %}selected{% endif %}>18.5kW</option>
+              <option value="22"    {% if selected_rated_power_hp == "22"    %}selected{% endif %}>22kW</option>
+              <option value="30"    {% if selected_rated_power_hp == "30"    %}selected{% endif %}>30kW</option>
+              <option value="37"    {% if selected_rated_power_hp == "37"    %}selected{% endif %}>37kW</option>
+              <option value="45"    {% if selected_rated_power_hp == "45"    %}selected{% endif %}>45kW</option>
+              <option value="55"    {% if selected_rated_power_hp == "55"    %}selected{% endif %}>55kW</option>
+              <option value="75"    {% if selected_rated_power_hp == "75"    %}selected{% endif %}>75kW</option>
+              <option value="90"    {% if selected_rated_power_hp == "90"    %}selected{% endif %}>90kW</option>
+              <option value="110"   {% if selected_rated_power_hp == "110"   %}selected{% endif %}>110kW</option>
+              <option value="132"   {% if selected_rated_power_hp == "132"   %}selected{% endif %}>132kW</option>
+              <option value="160"   {% if selected_rated_power_hp == "160"   %}selected{% endif %}>160kW</option>
+              <option value="185"   {% if selected_rated_power_hp == "185"   %}selected{% endif %}>185kW</option>
+              <option value="220"   {% if selected_rated_power_hp == "220"   %}selected{% endif %}>220kW</option>
+              <option value="250"   {% if selected_rated_power_hp == "250"   %}selected{% endif %}>250kW</option>
+              <option value="280"   {% if selected_rated_power_hp == "280"   %}selected{% endif %}>280kW</option>
+              <option value="315"   {% if selected_rated_power_hp == "315"   %}selected{% endif %}>315kW</option>
+              <option value="355"   {% if selected_rated_power_hp == "355"   %}selected{% endif %}>355kW</option>
+              <option value="400"   {% if selected_rated_power_hp == "400"   %}selected{% endif %}>400kW</option>
+            </select>
+          </div>
+
+          <!-- Rated Current (A) -->
+          <div class="col-md-2">
+            <label for="rated_current_a" class="form-label fw-semibold">Rated Current (A)</label>
+            <select name="rated_current_a" id="rated_current_a" class="form-select">
+              <option value="">-- All --</option>
+              <!-- Full list from 1.2A through 962A -->
+              <option value="1.2A"  {% if selected_rated_current_a == "1.2A"  %}selected{% endif %}>1.2A</option>
+              <option value="1.6A"  {% if selected_rated_current_a == "1.6A"  %}selected{% endif %}>1.6A</option>
+              <option value="2.2A"  {% if selected_rated_current_a == "2.2A"  %}selected{% endif %}>2.2A</option>
+              <option value="2.3A"  {% if selected_rated_current_a == "2.3A"  %}selected{% endif %}>2.3A</option>
+              <option value="2.5A"  {% if selected_rated_current_a == "2.5A"  %}selected{% endif %}>2.5A</option>
+              <option value="2.6A"  {% if selected_rated_current_a == "2.6A"  %}selected{% endif %}>2.6A</option>
+              <option value="3A"    {% if selected_rated_current_a == "3A"    %}selected{% endif %}>3A</option>
+              <option value="3.6A"  {% if selected_rated_current_a == "3.6A"  %}selected{% endif %}>3.6A</option>
+              <option value="3.8A"  {% if selected_rated_current_a == "3.8A"  %}selected{% endif %}>3.8A</option>
+              <option value="4A"    {% if selected_rated_current_a == "4A"    %}selected{% endif %}>4A</option>
+              <option value="4.2A"  {% if selected_rated_current_a == "4.2A"  %}selected{% endif %}>4.2A</option>
+              <option value="4.6A"  {% if selected_rated_current_a == "4.6A"  %}selected{% endif %}>4.6A</option>
+              <option value="5A"    {% if selected_rated_current_a == "5A"    %}selected{% endif %}>5A</option>
+              <option value="5.2A"  {% if selected_rated_current_a == "5.2A"  %}selected{% endif %}>5.2A</option>
+              <option value="6A"    {% if selected_rated_current_a == "6A"    %}selected{% endif %}>6A</option>
+              <option value="7A"    {% if selected_rated_current_a == "7A"    %}selected{% endif %}>7A</option>
+              <option value="7.7A"  {% if selected_rated_current_a == "7.7A"  %}selected{% endif %}>7.7A</option>
+              <option value="8A"    {% if selected_rated_current_a == "8A"    %}selected{% endif %}>8A</option>
+              <option value="8.3A"  {% if selected_rated_current_a == "8.3A"  %}selected{% endif %}>8.3A</option>
+              <option value="9.5A"  {% if selected_rated_current_a == "9.5A"  %}selected{% endif %}>9.5A</option>
+              <option value="10A"   {% if selected_rated_current_a == "10A"   %}selected{% endif %}>10A</option>
+              <option value="10.5A" {% if selected_rated_current_a == "10.5A" %}selected{% endif %}>10.5A</option>
+              <option value="11A"   {% if selected_rated_current_a == "11A"   %}selected{% endif %}>11A</option>
+              <option value="12A"   {% if selected_rated_current_a == "12A"   %}selected{% endif %}>12A</option>
+              <option value="12.6A" {% if selected_rated_current_a == "12.6A" %}selected{% endif %}>12.6A</option>
+              <option value="16A"   {% if selected_rated_current_a == "16A"   %}selected{% endif %}>16A</option>
+              <option value="16.5A" {% if selected_rated_current_a == "16.5A" %}selected{% endif %}>16.5A</option>
+              <option value="16.7A" {% if selected_rated_current_a == "16.7A" %}selected{% endif %}>16.7A</option>
+              <option value="17A"   {% if selected_rated_current_a == "17A"   %}selected{% endif %}>17A</option>
+              <option value="17.5A" {% if selected_rated_current_a == "17.5A" %}selected{% endif %}>17.5A</option>
+              <option value="23A"   {% if selected_rated_current_a == "23A"   %}selected{% endif %}>23A</option>
+              <option value="23.8A" {% if selected_rated_current_a == "23.8A" %}selected{% endif %}>23.8A</option>
+              <option value="24A"   {% if selected_rated_current_a == "24A"   %}selected{% endif %}>24A</option>
+              <option value="25A"   {% if selected_rated_current_a == "25A"   %}selected{% endif %}>25A</option>
+              <option value="29.5A" {% if selected_rated_current_a == "29.5A" %}selected{% endif %}>29.5A</option>
+              <option value="30A"   {% if selected_rated_current_a == "30A"   %}selected{% endif %}>30A</option>
+              <option value="31A"   {% if selected_rated_current_a == "31A"   %}selected{% endif %}>31A</option>
+              <option value="31.8A" {% if selected_rated_current_a == "31.8A" %}selected{% endif %}>31.8A</option>
+              <option value="33A"   {% if selected_rated_current_a == "33A"   %}selected{% endif %}>33A</option>
+              <option value="34A"   {% if selected_rated_current_a == "34A"   %}selected{% endif %}>34A</option>
+              <option value="38A"   {% if selected_rated_current_a == "38A"   %}selected{% endif %}>38A</option>
+              <option value="45A"   {% if selected_rated_current_a == "45A"   %}selected{% endif %}>45A</option>
+              <option value="47A"   {% if selected_rated_current_a == "47A"   %}selected{% endif %}>47A</option>
+              <option value="49A"   {% if selected_rated_current_a == "49A"   %}selected{% endif %}>49A</option>
+              <option value="58A"   {% if selected_rated_current_a == "58A"   %}selected{% endif %}>58A</option>
+              <option value="60A"   {% if selected_rated_current_a == "60A"   %}selected{% endif %}>60A</option>
+              <option value="62A"   {% if selected_rated_current_a == "62A"   %}selected{% endif %}>62A</option>
+              <option value="63A"   {% if selected_rated_current_a == "63A"   %}selected{% endif %}>63A</option>
+              <option value="77A"   {% if selected_rated_current_a == "77A"   %}selected{% endif %}>77A</option>
+              <option value="93A"   {% if selected_rated_current_a == "93A"   %}selected{% endif %}>93A</option>
+              <option value="116A"  {% if selected_rated_current_a == "116A"  %}selected{% endif %}>116A</option>
+              <option value="180A"  {% if selected_rated_current_a == "180A"  %}selected{% endif %}>180A</option>
+              <option value="216A"  {% if selected_rated_current_a == "216A"  %}selected{% endif %}>216A</option>
+              <option value="260A"  {% if selected_rated_current_a == "260A"  %}selected{% endif %}>260A</option>
+              <option value="325A"  {% if selected_rated_current_a == "325A"  %}selected{% endif %}>325A</option>
+              <option value="361A"  {% if selected_rated_current_a == "361A"  %}selected{% endif %}>361A</option>
+              <option value="432A"  {% if selected_rated_current_a == "432A"  %}selected{% endif %}>432A</option>
+              <option value="481A"  {% if selected_rated_current_a == "481A"  %}selected{% endif %}>481A</option>
+              <option value="547A"  {% if selected_rated_current_a == "547A"  %}selected{% endif %}>547A</option>
+              <option value="610A"  {% if selected_rated_current_a == "610A"  %}selected{% endif %}>610A</option>
+              <option value="683A"  {% if selected_rated_current_a == "683A"  %}selected{% endif %}>683A</option>
+              <option value="770A"  {% if selected_rated_current_a == "770A"  %}selected{% endif %}>770A</option>
+              <option value="866A"  {% if selected_rated_current_a == "866A"  %}selected{% endif %}>866A</option>
+              <option value="962A"  {% if selected_rated_current_a == "962A"  %}selected{% endif %}>962A</option>
+            </select>
+          </div>
+
+          <!-- Application -->
+          <div class="col-md-2">
+            <label for="application" class="form-label fw-semibold">Application</label>
+            <select name="application" id="application" class="form-select">
+              <option value="">-- All --</option>
+              <option value="Heavy"  {% if selected_application == "Heavy"  %}selected{% endif %}>Heavy</option>
+              <option value="Normal" {% if selected_application == "Normal" %}selected{% endif %}>Normal</option>
+            </select>
+          </div>
+
+          <!-- Buttons -->
+          <div class="col-md-2 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary me-2">Filter</button>
+            <a href="{% url 'search' %}" class="btn btn-secondary">Reset</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Search Results Section -->
+  <div class="bg-white rounded shadow-sm p-4">
+    {% if products %}
+      <div class="row">
+        {% for product in products %}
+          <div class="col-md-3 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+              {% if product.image %}
+                <img
+                  src="{{ product.image.url }}"
+                  alt="{{ product.sku }}"
+                  class="card-img-top"
+                  style="max-height:220px; object-fit:contain; background-color:#f9f9f9;"
+                >
+              {% else %}
+                <img
+                  src="{% static 'images/default-placeholder.png' %}"
+                  alt="No Image"
+                  class="card-img-top"
+                  style="max-height:220px; object-fit:contain; background-color:#f9f9f9;"
+                >
+              {% endif %}
+              <div class="card-body text-center">
+                <h5 class="card-title">{{ product.sku }}</h5>
+                {% if product.original_price %}
+                  <p class="card-text text-danger fw-bold" style="font-size:1.2rem;">
+                    ৳{{ product.original_price|indian_format }}
+                  </p>
+                {% else %}
+                  <p class="card-text text-muted">Price not available</p>
+                {% endif %}
+                <a href="{% url 'product_detail' product.sku %}" class="btn btn-dark">
+                  View Details
+                </a>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="text-center">No products found matching your query.</p>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

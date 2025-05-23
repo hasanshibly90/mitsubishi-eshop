@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container my-5">
+  <!-- Discount Request Header Card -->
+  <div class="card shadow-lg mb-4">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">New Discount Request</h2>
+    </div>
+    <div class="card-body">
+      <form method="POST" id="discount-request-form">
+        {% csrf_token %}
+        
+        <!-- Quotation Header Fields -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold mb-1">{{ header_form.customer_name.label }}</label>
+            {{ header_form.customer_name|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold mb-1">{{ header_form.phone_no.label }}</label>
+            {{ header_form.phone_no|add_class:"form-control" }}
+          </div>
+        </div>
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold mb-1">{{ header_form.email.label }}</label>
+            {{ header_form.email|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold mb-1">{{ header_form.delivery_address.label }}</label>
+            {{ header_form.delivery_address|add_class:"form-control" }}
+          </div>
+        </div>
+        
+        <!-- Line Items Card -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Line Items</h5>
+          </div>
+          <div class="card-body p-0">
+            {{ formset.management_form }}
+            <table class="table table-bordered table-sm mb-0" id="line-items-table">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 200px;">Product</th>
+                  <th style="width: 180px;">Description</th>
+                  <th class="text-center" style="width: 80px;">Quantity</th>
+                  <th class="text-end" style="width: 120px;">Unit Price</th>
+                  <th class="text-center" style="width: 80px;">Discount (%)</th>
+                  {% if formset.can_delete %}
+                    <th style="width: 60px;">Remove</th>
+                  {% endif %}
+                </tr>
+              </thead>
+              <tbody id="formset-body">
+                {% for lineform in formset %}
+                  <tr>
+                    <td>
+                      {{ lineform.id }}
+                      <!-- Add class for JS usage -->
+                      {{ lineform.product|add_class:"form-control product-select" }}
+                    </td>
+                    <td>{{ lineform.description|add_class:"form-control" }}</td>
+                    <td class="text-center">
+                      {{ lineform.quantity|add_class:"form-control text-center quantity-input" }}
+                    </td>
+                    <td class="text-end align-middle">
+                      <!-- Hidden real price field -->
+                      {{ lineform.unit_price.as_hidden }}
+                      <!-- Read-only display of Indian-formatted price -->
+                      <input type="text"
+                             class="form-control text-end display-price"
+                             value="{{ lineform.unit_price.value|indian_format }}"
+                             readonly>
+                    </td>
+                    <td class="text-center">
+                      {{ lineform.discount_percent|add_class:"form-control text-center discount-input" }}
+                    </td>
+                    {% if formset.can_delete %}
+                      <td class="text-center">
+                        <!-- Hide the default delete checkbox -->
+                        {{ lineform.DELETE|add_class:"d-none" }}
+                        <!-- Red "X" to remove the row -->
+                        <span class="text-danger fw-bold" style="cursor:pointer;"
+                              onclick="
+                                this.parentElement.querySelector('input[type=checkbox]').checked = true;
+                                this.closest('tr').style.display = 'none';
+                                recalcTotal();
+                              ">
+                          X
+                        </span>
+                      </td>
+                    {% endif %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer text-end">
+            <strong>Total: </strong><span id="grand-total">0.00</span>
+          </div>
+        </div>
+        
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center">
+          <button type="button" class="btn btn-outline-secondary" id="add-line-btn">+ Add Another Line</button>
+          <div>
+            <button type="submit" class="btn btn-primary me-2">Submit Discount Request</button>
+            <a href="{% url 'home' %}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden Template Row -->
+<table style="display:none;">
+  <tbody>
+    <tr id="empty-form-row">
+      <td>
+        {{ formset.empty_form.id }}
+        {{ formset.empty_form.product|add_class:"form-control product-select" }}
+      </td>
+      <td>{{ formset.empty_form.description|add_class:"form-control" }}</td>
+      <td class="text-center">
+        {{ formset.empty_form.quantity|add_class:"form-control text-center quantity-input" }}
+      </td>
+      <td class="text-end align-middle">
+        {{ formset.empty_form.unit_price.as_hidden }}
+        <input type="text"
+               class="form-control text-end display-price"
+               value="{{ formset.empty_form.unit_price.value|indian_format }}"
+               readonly>
+      </td>
+      <td class="text-center">
+        {{ formset.empty_form.discount_percent|add_class:"form-control text-center discount-input" }}
+      </td>
+      {% if formset.can_delete %}
+        <td class="text-center">
+          {{ formset.empty_form.DELETE|add_class:"d-none" }}
+          <span class="text-danger fw-bold" style="cursor:pointer;"
+                onclick="
+                  this.parentElement.querySelector('input[type=checkbox]').checked = true;
+                  this.closest('tr').style.display = 'none';
+                  recalcTotal();
+                ">
+            X
+          </span>
+        </td>
+      {% endif %}
+    </tr>
+  </tbody>
+</table>
+
+<script>
+  // Mapping of product IDs to unit prices (from the view)
+  const productPrices = {{ product_prices_json|safe }};
+
+  // Convert a number to Indian currency format
+  function toIndianFormat(numStr) {
+    let [integer, decimal] = parseFloat(numStr).toFixed(2).split(".");
+    let last3 = integer.slice(-3);
+    let rest = integer.slice(0, -3);
+    if (rest) {
+      last3 = "," + last3;
+      rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+    }
+    return rest + last3 + "." + decimal;
+  }
+
+  // Recompute total from visible rows only
+  function recalcTotal() {
+    let total = 0;
+    document.querySelectorAll("#formset-body tr").forEach(row => {
+      // skip hidden rows
+      if (row.offsetParent === null) return;
+      const qtyInput = row.querySelector(".quantity-input");
+      const hiddenPriceInput = row.querySelector("input[name$='-unit_price']");
+      const discountInput = row.querySelector(".discount-input");
+
+      const qty = parseFloat(qtyInput?.value) || 0;
+      const price = parseFloat(hiddenPriceInput?.value) || 0;
+      const discount = parseFloat(discountInput?.value) || 0;
+
+      const lineTotal = qty * price;
+      const discountAmount = lineTotal * (discount / 100);
+      total += (lineTotal - discountAmount);
+    });
+    document.getElementById("grand-total").textContent = toIndianFormat(total);
+  }
+
+  // Initialize row event bindings
+  function initializeRow(row) {
+    const productSelect = row.querySelector(".product-select");
+    const hiddenPriceInput = row.querySelector("input[name$='-unit_price']");
+    const displayPriceInput = row.querySelector(".display-price");
+    const qtyInput = row.querySelector(".quantity-input");
+    const discountInput = row.querySelector(".discount-input");
+
+    // On product change, update hidden price + displayed price
+    if (productSelect) {
+      productSelect.addEventListener("change", () => {
+        const prodId = productSelect.value;
+        if (prodId && productPrices[prodId]) {
+          hiddenPriceInput.value = productPrices[prodId];
+          displayPriceInput.value = toIndianFormat(productPrices[prodId]);
+        } else {
+          hiddenPriceInput.value = 0;
+          displayPriceInput.value = "0.00";
+        }
+        recalcTotal();
+      });
+    }
+    if (qtyInput) qtyInput.addEventListener("input", recalcTotal);
+    if (discountInput) discountInput.addEventListener("input", recalcTotal);
+  }
+
+  // Initialize existing rows
+  document.querySelectorAll("#formset-body tr").forEach(row => {
+    initializeRow(row);
+  });
+
+  // "Add Another Line" functionality
+  const totalFormsInput = document.getElementById("id_lines-TOTAL_FORMS");
+  const addLineBtn = document.getElementById("add-line-btn");
+  const formsetBody = document.getElementById("formset-body");
+  const emptyFormRow = document.getElementById("empty-form-row");
+
+  addLineBtn.addEventListener("click", () => {
+    const formIndex = parseInt(totalFormsInput.value);
+    const newRow = emptyFormRow.cloneNode(true);
+    newRow.removeAttribute("id");
+    newRow.style.display = "";
+    const regex = new RegExp('__prefix__', 'g');
+    newRow.innerHTML = newRow.innerHTML.replace(regex, formIndex);
+    formsetBody.appendChild(newRow);
+    totalFormsInput.value = formIndex + 1;
+    initializeRow(newRow);
+    recalcTotal();
+  });
+
+  // If the formset has zero forms, automatically add one line on page load
+  // (This is a fallback if you haven't set extra=1 or a fallback in the view)
+  {% if formset.total_form_count == 0 %}
+  document.addEventListener("DOMContentLoaded", function() {
+    addLineBtn.click();
+  });
+  {% endif %}
+
+  // Initial total calc
+  recalcTotal();
+</script>
+{% endblock %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+
+  <!-- Parent Category Heading -->
+  <h2 class="mb-4">{{ parent_cat.name }}</h2>
+
+  <!-- SCENARIO A: The parent has child categories -->
+  {% if has_children %}
+    {% if data %}
+      {% for item in data %}
+        <div class="white-board mb-4 p-4" style="border-radius:5px; box-shadow: 0 0 8px rgba(0,0,0,0.1);">
+          <!-- Child Category Name + "View all" -->
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 class="mb-0">{{ item.child_cat.name }}</h4>
+            <!-- "View All" button color: #002b49 with white text -->
+            <a 
+              href="{% url 'category_filter' item.child_cat.name %}"
+              class="btn"
+              style="background-color: #002b49; color: #fff; white-space: nowrap;"
+            >
+              View all
+            </a>
+          </div>
+
+          {% if item.child_products %}
+            <div class="row">
+              {% for product in item.child_products %}
+                <div class="col-md-3 mb-3">
+                  <div class="card h-100 text-center" style="border:none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius:5px;">
+                    <div class="card-body">
+                      {% if product.image %}
+                        <img
+                          src="{{ product.image.url }}"
+                          alt="{{ product.sku }}"
+                          style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                          class="mb-3"
+                        >
+                      {% else %}
+                        <img
+                          src="{% static 'images/default-placeholder.png' %}"
+                          alt="No Image"
+                          style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                          class="mb-3"
+                        >
+                      {% endif %}
+                      <h6 class="fw-bold mb-2">{{ product.sku }}</h6>
+                      <!-- "Details" button color: #002b49 with white text -->
+                      <a 
+                        href="{% url 'product_detail' product.sku %}"
+                        class="btn"
+                        style="background-color: #002b49; color: #fff; white-space: nowrap;"
+                      >
+                        Details
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <p>No products found for {{ item.child_cat.name }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    {% else %}
+      <!-- If the parent *does* have children, but for some reason data is empty -->
+      <p>No subcategories found under {{ parent_cat.name }}.</p>
+    {% endif %}
+
+  <!-- SCENARIO B: The parent has *no* child categories -->
+  {% else %}
+    <div class="white-board mb-4 p-4" style="border-radius:5px; box-shadow: 0 0 8px rgba(0,0,0,0.1);">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">{{ parent_cat.name }}</h4>
+        <!-- "View All" button color: #002b49 with white text -->
+        <a 
+          href="{% url 'category_filter' parent_cat.name %}"
+          class="btn"
+          style="background-color: #002b49; color: #fff; white-space: nowrap;"
+        >
+          View all
+        </a>
+      </div>
+
+      {% if parent_products %}
+        <div class="row">
+          {% for product in parent_products %}
+            <div class="col-md-3 mb-3">
+              <div class="card h-100 text-center" style="border:none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius:5px;">
+                <div class="card-body">
+                  {% if product.image %}
+                    <img
+                      src="{{ product.image.url }}"
+                      alt="{{ product.sku }}"
+                      style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                      class="mb-3"
+                    >
+                  {% else %}
+                    <img
+                      src="{% static 'images/default-placeholder.png' %}"
+                      alt="No Image"
+                      style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                      class="mb-3"
+                    >
+                  {% endif %}
+                  <h6 class="fw-bold mb-2">{{ product.sku }}</h6>
+                  <!-- "Details" button color: #ffca2c with black text -->
+                  <a 
+                    href="{% url 'product_detail' product.sku %}"
+                    class="btn"
+                    style="background-color: #ffca2c; color: #000; white-space: nowrap;"
+                  >
+                    Details
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No products found for {{ parent_cat.name }}</p>
+      {% endif %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

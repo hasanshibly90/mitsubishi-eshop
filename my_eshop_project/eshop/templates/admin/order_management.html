@@ -1,0 +1,44 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+  <h1>Order Management Dashboard</h1>
+
+  <form method="get" action="">
+    <label for="status">Filter by Status:</label>
+    <select name="status" id="status" onchange="this.form.submit()">
+      <option value="">All</option>
+      <option value="P" {% if request.GET.status == "P" %}selected{% endif %}>Pending</option>
+      <option value="C" {% if request.GET.status == "C" %}selected{% endif %}>Confirmed</option>
+      <option value="X" {% if request.GET.status == "X" %}selected{% endif %}>Canceled</option>
+      <option value="D" {% if request.GET.status == "D" %}selected{% endif %}>Delivered</option>
+    </select>
+  </form>
+
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th>Order Number</th>
+        <th>Customer</th>
+        <th>Date/Time</th>
+        <th>Total Amount</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <td>{{ order.order_number }}</td>
+        <td>{{ order.customer }}</td>
+        <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+        <td>{{ order.total_amount }}</td>
+        <td>{{ order.get_status_display }}</td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">No orders found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

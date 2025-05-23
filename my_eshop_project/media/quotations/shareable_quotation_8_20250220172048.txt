@@ -1,0 +1,13 @@
+Discount Request Details
+------------------------------
+Quotation ID: 8
+Customer: superadmin
+Notes: 
+
+Line Items:
+  - Product: FR-F840-22K-1
+    Quantity: 1
+    Unit Price: 142000.00
+    Discount: 0.00%
+
+Total Amount: 142000.0000

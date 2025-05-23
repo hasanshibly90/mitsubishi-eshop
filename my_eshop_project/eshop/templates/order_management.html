@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %} {# ensure your 'indian_format' filter is loaded #}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="text-center mb-4">Order Management Dashboard</h2>
+  
+  <!-- Filter buttons -->
+  <div class="mb-3 text-center">
+    <a href="?status=P" class="btn btn-outline-primary">Pending</a>
+    <a href="?status=C" class="btn btn-outline-success">Confirmed</a>
+    <a href="?status=X" class="btn btn-outline-danger">Canceled</a>
+    <a href="?status=D" class="btn btn-outline-info">Delivered</a>
+    <a href="{% url 'order_management' %}" class="btn btn-outline-secondary">All</a>
+  </div>
+
+  <!-- Orders Table -->
+  <table class="table table-striped table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Order Number</th>
+        <th>Customer Name</th>
+        <th>Phone No</th>
+        <th class="text-end">Total Amount</th> <!-- Right align header too -->
+        <th>Status</th>
+        <th>Created At</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in orders %}
+      <tr>
+        <!-- Order Number -->
+        <td>{{ order.order_number }}</td>
+
+        <!-- Customer Name -->
+        <td>
+          {% if order.customer_name %}
+            {{ order.customer_name }}
+          {% elif order.customer %}
+            {{ order.customer.get_full_name|default:order.customer.username }}
+          {% else %}
+            Anonymous
+          {% endif %}
+        </td>
+
+        <!-- Phone No -->
+        <td>{{ order.phone_no|default:"" }}</td>
+
+        <!-- Total Amount (Indian format + right aligned) -->
+        <td class="text-end">
+          {{ order.total_amount|indian_format }}
+        </td>
+
+        <!-- Status -->
+        <td>{{ order.get_status_display }}</td>
+
+        <!-- Created At -->
+        <td>{{ order.created_at|date:"Y-m-d H:i" }}</td>
+
+        <!-- Actions -->
+        <td>
+          <a href="{% url 'quotation_detail' order.pk %}" class="btn btn-sm btn-primary">View</a>
+          <a href="{% url 'edit_order' order.pk %}" class="btn btn-sm btn-secondary">Edit</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="7" class="text-center">No orders found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

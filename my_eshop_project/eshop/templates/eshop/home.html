@@ -1,0 +1,305 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<style>
+  /* Smooth scrolling for anchor jumps */
+  html {
+    scroll-behavior: smooth;
+  }
+</style>
+
+<!-- Top Section: Categories (Left) & Banner (Right) -->
+<div class="white-board mb-4" style="border-radius:5px;">
+  <div class="row">
+    <!-- Left Column: Categories -->
+    <div class="col-md-4">
+      <div class="card" style="border:none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius:5px;">
+        <div class="card-body">
+          <h5 class="card-title">Categories</h5>
+          <ul class="list-group" id="categoriesAccordion">
+            {% for cat in categories %}
+              <li class="list-group-item" style="color: black;">
+                <a data-bs-toggle="collapse"
+                   href="#collapse{{ cat.id }}"
+                   role="button"
+                   aria-expanded="false"
+                   aria-controls="collapse{{ cat.id }}"
+                   style="color: black; text-decoration: none;">
+                  <strong>{{ cat.name }}</strong>
+                </a>
+
+                <!-- If cat has children (sub-categories) -->
+                {% if cat.children.exists %}
+                  <div class="collapse"
+                       id="collapse{{ cat.id }}"
+                       data-bs-parent="#categoriesAccordion">
+                    <ul class="list-group mt-2" style="margin-left: 15px;">
+
+                      {% for subcat in cat.children.all %}
+                        <li class="list-group-item" style="color: black;">
+                          <!-- If subcat also has children, we can show them too -->
+                          {% if subcat.children.exists %}
+                            <a data-bs-toggle="collapse"
+                               href="#collapseSub{{ subcat.id }}"
+                               role="button"
+                               aria-expanded="false"
+                               aria-controls="collapseSub{{ subcat.id }}"
+                               style="color: black; text-decoration: none;">
+                              {{ subcat.name }}
+                            </a>
+                            <div class="collapse"
+                                 id="collapseSub{{ subcat.id }}">
+                              <ul class="list-group mt-2" style="margin-left: 15px;">
+                                {% for subsubcat in subcat.children.all %}
+                                  <li class="list-group-item" style="color: black;">
+                                    <a href="{% url 'category_filter' subsubcat.name %}"
+                                       style="text-decoration: none; color: black;"
+                                       onclick="event.stopPropagation();">
+                                      {{ subsubcat.name }}
+                                    </a>
+                                  </li>
+                                {% endfor %}
+                              </ul>
+                            </div>
+
+                          {% else %}
+                            <!-- subcat has no further children; link or special logic -->
+                            {% if subcat.name == "VFD" %}
+                              <a href="#vfd-section" style="text-decoration: none; color: black;"
+                                 onclick="event.stopPropagation();">
+                                {{ subcat.name }}
+                              </a>
+                            {% elif subcat.name == "PLC" %}
+                              <a href="#plc-section" style="text-decoration: none; color: black;"
+                                 onclick="event.stopPropagation();">
+                                {{ subcat.name }}
+                              </a>
+                            {% elif subcat.name == "HMI" %}
+                              <a href="#hmi-section" style="text-decoration: none; color: black;"
+                                 onclick="event.stopPropagation();">
+                                {{ subcat.name }}
+                              </a>
+                            {% elif subcat.name == "SERVO" %}
+                              <a href="#servo-section" style="text-decoration: none; color: black;"
+                                 onclick="event.stopPropagation();">
+                                {{ subcat.name }}
+                              </a>
+                            {% else %}
+                              <a href="{% url 'category_filter' subcat.name %}"
+                                 style="text-decoration: none; color: black;"
+                                 onclick="event.stopPropagation();">
+                                {{ subcat.name }}
+                              </a>
+                            {% endif %}
+                          {% endif %}
+                        </li>
+                      {% endfor %}
+
+                    </ul>
+                  </div>
+                {% endif %}
+              </li>
+            {% empty %}
+              <li class="list-group-item">No categories found</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Right Column: Banner -->
+    <div class="col-md-8">
+      <div class="banner-container" style="overflow:hidden; border-radius:5px;">
+        {% if banner and banner.image %}
+          <img src="{{ banner.image.url }}" alt="{{ banner.title }}" style="width:100%; height:auto;">
+        {% else %}
+          <img src="{% static 'images/banner.jpg' %}" alt="Default Banner" style="width:100%; height:auto;">
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VFD Section -->
+{% if vfd_products %}
+<div class="white-board mb-4" id="vfd-section">
+  <h2 class="text-center mb-4">Variable Frequency Drive (VFD)</h2>
+  <div class="row">
+    {% for product in vfd_products|slice:":4" %}
+      <div class="col-md-3 mb-4">
+        <div class="card h-100 text-center"
+             style="border:none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius:5px;">
+          <div class="card-body">
+            {% if product.image %}
+              <img src="{{ product.image.url }}"
+                   alt="{{ product.name }}"
+                   style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                   class="mb-3">
+            {% else %}
+              <img src="{% static 'images/default-placeholder.png' %}"
+                   alt="No Image"
+                   style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                   class="mb-3">
+            {% endif %}
+            <h6 class="fw-bold">
+              <a href="{% url 'product_detail' product.sku %}"
+                 style="text-decoration: none; color: inherit;">
+                {{ product.name }}
+              </a>
+            </h6>
+            {% if product.original_price %}
+              <p class="fs-5 fw-bold" style="color:#ff0000;">৳{{ product.original_price|indian_format }}</p>
+            {% else %}
+              <p style="font-size:1.0rem; color:#666;">Price not available</p>
+            {% endif %}
+            <a href="{% url 'ask_for_discount' product.sku %}"
+               class="btn rounded-pill"
+               style="background-color: #002b49; color: #fff; white-space: nowrap;">
+               Ask for Discount
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- PLC Section -->
+{% if plc_products %}
+<div class="white-board mb-4" id="plc-section">
+  <h2 class="text-center mb-4">Programmable Logic Controller (PLC)</h2>
+  <div class="row">
+    {% for product in plc_products|slice:":4" %}
+      <div class="col-md-3 mb-4">
+        <div class="card h-100 text-center"
+             style="border:none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius:5px;">
+          <div class="card-body">
+            {% if product.image %}
+              <img src="{{ product.image.url }}"
+                   alt="{{ product.name }}"
+                   style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                   class="mb-3">
+            {% else %}
+              <img src="{% static 'images/default-placeholder.png' %}"
+                   alt="No Image"
+                   style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                   class="mb-3">
+            {% endif %}
+            <h6 class="fw-bold">
+              <a href="{% url 'product_detail' product.sku %}"
+                 style="text-decoration: none; color: inherit;">
+                {{ product.name }}
+              </a>
+            </h6>
+            {% if product.original_price %}
+              <p class="fs-5 fw-bold" style="color:#ff0000;">৳{{ product.original_price|indian_format }}</p>
+            {% else %}
+              <p style="font-size:1.0rem; color:#666;">Price not available</p>
+            {% endif %}
+            <a href="{% url 'ask_for_discount' product.sku %}"
+               class="btn rounded-pill"
+               style="background-color: #002b49; color: #fff; white-space: nowrap;">
+               Ask for Discount
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- HMI Section -->
+{% if hmi_products %}
+<div class="white-board mb-4" id="hmi-section">
+  <h2 class="text-center mb-4">Human Machine Interface (HMI)</h2>
+  <div class="row">
+    {% for product in hmi_products|slice:":4" %}
+      <div class="col-md-3 mb-4">
+        <div class="card h-100 text-center"
+             style="border:none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius:5px;">
+          <div class="card-body">
+            {% if product.image %}
+              <img src="{{ product.image.url }}"
+                   alt="{{ product.name }}"
+                   style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                   class="mb-3">
+            {% else %}
+              <img src="{% static 'images/default-placeholder.png' %}"
+                   alt="No Image"
+                   style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                   class="mb-3">
+            {% endif %}
+            <h6 class="fw-bold">
+              <a href="{% url 'product_detail' product.sku %}"
+                 style="text-decoration: none; color: inherit;">
+                {{ product.name }}
+              </a>
+            </h6>
+            {% if product.original_price %}
+              <p class="fs-5 fw-bold" style="color:#ff0000;">৳{{ product.original_price|indian_format }}</p>
+            {% else %}
+              <p style="font-size:1.0rem; color:#666;">Price not available</p>
+            {% endif %}
+            <a href="{% url 'ask_for_discount' product.sku %}"
+               class="btn rounded-pill"
+               style="background-color: #002b49; color: #fff; white-space: nowrap;">
+               Ask for Discount
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- SERVO Section -->
+{% if servo_products %}
+<div class="white-board mb-4" id="servo-section">
+  <h2 class="text-center mb-4">SERVO SYSTEM</h2>
+  <div class="row">
+    {% for product in servo_products|slice:":4" %}
+      <div class="col-md-3 mb-4">
+        <div class="card h-100 text-center"
+             style="border:none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius:5px;">
+          <div class="card-body">
+            {% if product.image %}
+              <img src="{{ product.image.url }}"
+                   alt="{{ product.name }}"
+                   style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                   class="mb-3">
+            {% else %}
+              <img src="{% static 'images/default-placeholder.png' %}"
+                   alt="No Image"
+                   style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9; border-radius:5px;"
+                   class="mb-3">
+            {% endif %}
+            <h6 class="fw-bold">
+              <a href="{% url 'product_detail' product.sku %}"
+                 style="text-decoration: none; color: inherit;">
+                {{ product.name }}
+              </a>
+            </h6>
+            {% if product.original_price %}
+              <p class="fs-5 fw-bold" style="color:#ff0000;">৳{{ product.original_price|indian_format }}</p>
+            {% else %}
+              <p style="font-size:1.0rem; color:#666;">Price not available</p>
+            {% endif %}
+            <a href="{% url 'ask_for_discount' product.sku %}"
+               class="btn rounded-pill"
+               style="background-color: #002b49; color: #fff; white-space: nowrap;">
+               Ask for Discount
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}

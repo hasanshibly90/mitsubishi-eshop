@@ -1,0 +1,36 @@
+<!-- vfd_voltages.html -->
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<h2>3 PHASE, 200VAC (A)</h2>
+{% if subcat1 %}
+  <p>Subcategory: {{ subcat1.name }}</p>
+{% endif %}
+<div class="row">
+  {% for product in products1 %}
+    <!-- Render your product card here -->
+    <div class="col-md-3">
+      <h6>{{ product.name }}</h6>
+      <!-- etc. -->
+    </div>
+  {% endfor %}
+</div>
+
+<hr />
+
+<h2>3 PHASE, 400VAC (A)</h2>
+{% if subcat2 %}
+  <p>Subcategory: {{ subcat2.name }}</p>
+{% endif %}
+<div class="row">
+  {% for product in products2 %}
+    <!-- Render your product card here -->
+    <div class="col-md-3">
+      <h6>{{ product.name }}</h6>
+      <!-- etc. -->
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

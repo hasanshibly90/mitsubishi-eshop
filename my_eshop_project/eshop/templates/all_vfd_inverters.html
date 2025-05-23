@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="mb-4">All VFD Categories & Products</h2>
+
+  <!-- Loop over each sub-parent (like D/E/F/A) -->
+  {% for sec in sections %}
+    <div class="white-board mb-4 p-4" style="border-radius:5px; box-shadow: 0 0 8px rgba(0,0,0,0.1);">
+      <!-- Sub-parent category heading & "View all" -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">{{ sec.parent_cat.name }}</h4>
+        <!-- "View all" button, color #002b49 -->
+        <a 
+          href="{% url 'parent_detail' sec.parent_cat.slug %}"
+          class="btn text-white"
+          style="background-color: #002b49; white-space: nowrap;"
+        >
+          View all
+        </a>
+      </div>
+
+      <!-- Up to 4 products (if any) -->
+      <div class="row">
+        {% for product in sec.products %}
+          <div class="col-md-3 mb-3">
+            <div class="card h-100 text-center"
+                 style="border:none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius:5px;">
+              <div class="card-body">
+                {% if product.image %}
+                  <img
+                    src="{{ product.image.url }}"
+                    alt="{{ product.sku }}"
+                    style="width:100%; height:200px; object-fit:contain; background-color:#f9f9f9; border-radius:5px;"
+                    class="mb-3"
+                  >
+                {% else %}
+                  <img
+                    src="{% static 'images/default-placeholder.png' %}"
+                    alt="No Image"
+                    style="width:100%; height:200px; object-fit:contain; background-color:#f9f9f9; border-radius:5px;"
+                    class="mb-3"
+                  >
+                {% endif %}
+                <!-- Display SKU instead of Name -->
+                <h6 class="fw-bold mb-1">{{ product.sku }}</h6>
+                <!-- Show Original Price -->
+                <p class="text-danger fw-bold" style="font-size:1.2rem;">
+                  ৳{{ product.original_price|indian_format }}
+                </p>
+                <a
+                  href="{% url 'product_detail' product.sku %}"
+                  class="btn text-white"
+                  style="background-color: #002b49; white-space: nowrap;"
+                >
+                  Details
+                </a>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <p>No products found for {{ sec.parent_cat.name }}</p>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

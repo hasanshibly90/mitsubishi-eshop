@@ -1,0 +1,27 @@
+<!-- eshop/templates/create_quotation.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Create a Multi-Line Quotation</h2>
+
+<form method="POST">
+  {% csrf_token %}
+  
+  <h4>Quotation Header</h4>
+  {{ q_form.as_p }}
+
+  <h4>Line Items</h4>
+  {{ formset.management_form }}
+  {% for line_form in formset %}
+    <div class="line-item">
+      {{ line_form.as_p }}
+      {% if formset.can_delete %}
+        <label>Remove line?</label> {{ line_form.DELETE }}
+      {% endif %}
+    </div>
+  {% endfor %}
+
+  <button type="submit">Save Quotation</button>
+</form>
+{% endblock %}

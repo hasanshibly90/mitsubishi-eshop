@@ -1,0 +1,66 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% block content_title %}
+  <h1>Quotation Order Management</h1>
+{% endblock %}
+
+{% block result_list %}
+<div class="order-management">
+  <form method="get" style="margin-bottom: 20px;">
+    <label for="status">Filter by Status:</label>
+    <select name="status" id="status">
+      <option value="">All</option>
+      {% for key, label in cl.model.OrderStatus.choices %}
+         <option value="{{ key }}" {% if request.GET.status == key %}selected{% endif %}>
+           {{ label }}
+         </option>
+      {% endfor %}
+    </select>
+    <input type="submit" value="Filter" class="btn btn-primary">
+  </form>
+  
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Order Number</th>
+        <th>Customer</th>
+        <th>Created At</th>
+        <th>Total Amount</th>
+        <th>Status</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for obj in cl.result_list %}
+      <tr>
+        <td>{{ obj.order_number }}</td>
+        <td>{{ obj.customer }}</td>
+        <td>{{ obj.created_at|date:"Y-m-d H:i" }}</td>
+        <td>{{ obj.total_amount|floatformat:2 }}</td>
+        <td>{{ obj.get_status_display }}</td>
+        <td>
+          <a href="{% url 'admin:eshop_quotation_change' obj.pk %}">Edit</a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6">No orders found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  {% if cl.paginator.num_pages > 1 %}
+  <div class="pagination">
+    {% if cl.page_obj.has_previous %}
+      <a href="?{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}p={{ cl.page_obj.previous_page_number }}">Previous</a>
+    {% endif %}
+    <span>Page {{ cl.page_obj.number }} of {{ cl.paginator.num_pages }}</span>
+    {% if cl.page_obj.has_next %}
+      <a href="?{% if request.GET.status %}status={{ request.GET.status }}&{% endif %}p={{ cl.page_obj.next_page_number }}">Next</a>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

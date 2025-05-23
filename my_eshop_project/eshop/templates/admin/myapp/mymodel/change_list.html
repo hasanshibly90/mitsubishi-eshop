@@ -1,0 +1,30 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list admin_modify %}
+
+{% block content %}
+<div class="my-custom-layout">
+  <!-- Example: your "eshop section" or any custom HTML -->
+  <div id="eshop-section">
+    <h2>My eShop Section</h2>
+    <!-- ... some content ... -->
+  </div>
+
+  <!-- Move the filter here -->
+  {% if cl.list_filter %}
+    <div id="my-filter-block" style="float:left; margin-top:20px;">
+      <h3>Filter</h3>
+      <div id="changelist-filter">
+        {% admin_list_filter cl %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Then place the main changelist results. -->
+  <div id="main-results" style="margin-left:220px;"> 
+    <!-- Or however you want to position it. -->
+    {% block result_list %}
+      {% admin_list_result cl %}
+    {% endblock %}
+  </div>
+</div>
+{% endblock content %}

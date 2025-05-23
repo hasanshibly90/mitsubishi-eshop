@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container my-5">
+  <h2 class="text-center mb-4">FX SERIES</h2>
+  
+  <!-- First section: first 8 FX products -->
+  <div class="white-board mb-4">
+    <h3 class="mb-3">First 8 Products</h3>
+    <div class="row">
+      {% for product in fx_products %}
+        <div class="col-md-3 mb-4">
+          <div class="card h-100 text-center" style="border: none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius: 5px;">
+            <div class="card-body">
+              {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                     style="width:100%; height:200px; object-fit:contain; background-color:#f9f9f9; border-radius:5px;"
+                     class="mb-3">
+              {% else %}
+                <img src="{% static 'images/default-placeholder.png' %}" alt="No Image"
+                     style="width:100%; height:200px; object-fit:contain; background-color:#f9f9f9; border-radius:5px;"
+                     class="mb-3">
+              {% endif %}
+              <h6 style="font-weight:600;">{{ product.name }}</h6>
+              <p style="font-size:1.2rem; font-weight:bold;">৳{{ product.discounted_price }}</p>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-center">No products found in FX SERIES.</p>
+      {% endfor %}
+    </div>
+  </div>
+  
+  <!-- Second section: next 8 FX products -->
+  <div class="white-board">
+    <h3 class="mb-3">Another 8 Products</h3>
+    <div class="row">
+      {% for product in another_fx_products %}
+        <div class="col-md-3 mb-4">
+          <div class="card h-100 text-center" style="border: none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius: 5px;">
+            <div class="card-body">
+              {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                     style="width:100%; height:200px; object-fit:contain; background-color:#f9f9f9; border-radius:5px;"
+                     class="mb-3">
+              {% else %}
+                <img src="{% static 'images/default-placeholder.png' %}" alt="No Image"
+                     style="width:100%; height:200px; object-fit:contain; background-color:#f9f9f9; border-radius:5px;"
+                     class="mb-3">
+              {% endif %}
+              <h6 style="font-weight:600;">{{ product.name }}</h6>
+              <p style="font-size:1.2rem; font-weight:bold;">৳{{ product.discounted_price }}</p>
+            </div>
+          </div>
+        </div>
+      {% empty %}
+        <p class="text-center">No additional products in FX SERIES.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

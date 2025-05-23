@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+  <h2>{{ brand.name }}</h2>
+  {% if brand.logo %}
+    <img src="{{ brand.logo.url }}" alt="{{ brand.name }}" style="max-width:200px;">
+  {% endif %}
+  <p>{{ brand.description }}</p>
+  <hr>
+  <h3>Products</h3>
+  <ul>
+    {% for product in brand.products.all %}
+      <li>
+        <a href="{% url 'product-detail' product.id %}">{{ product.name }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

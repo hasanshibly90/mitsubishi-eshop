@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="text-center mb-4">Search &amp; Filter Products</h2>
+
+  <!-- Filter Form -->
+  <form method="get" action="{% url 'product_filter_search' %}">
+    <div class="row mb-3">
+      <!-- Autocomplete Search Field -->
+      <div class="col-md-3 mb-2">
+        <input type="text" name="q" id="product-name-search" class="form-control"
+               placeholder="Search by product name" value="{{ search_query }}">
+      </div>
+      <!-- Capacity Dropdown -->
+      <div class="col-md-3 mb-2">
+        <select name="capacity" class="form-control">
+          <option value="">-- Capacity --</option>
+          {% for cap in capacities %}
+            <option value="{{ cap }}" {% if cap == capacity_filter %}selected{% endif %}>{{ cap }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <!-- Voltage Type Dropdown -->
+      <div class="col-md-3 mb-2">
+        <select name="voltage_type" class="form-control">
+          <option value="">-- Voltage Type --</option>
+          {% for vt in voltage_types %}
+            <option value="{{ vt }}" {% if vt == voltage_type_filter %}selected{% endif %}>{{ vt }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <!-- Series Dropdown -->
+      <div class="col-md-3 mb-2">
+        <select name="series" class="form-control">
+          <option value="">-- Series --</option>
+          {% for s in series_list %}
+            <option value="{{ s }}" {% if s == series_filter %}selected{% endif %}>{{ s }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="row mb-3">
+      <div class="col text-center">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{% url 'product_filter_search' %}" class="btn btn-secondary">Clear</a>
+      </div>
+    </div>
+  </form>
+
+  <!-- Filtered Products -->
+  {% if products %}
+    <div class="row">
+      {% for product in products %}
+        <div class="col-md-4 mb-3">
+          <div class="card">
+            {% if product.image %}
+              <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+            {% endif %}
+            <div class="card-body">
+              <h5 class="card-title">{{ product.name }}</h5>
+              <p class="card-text">{{ product.description|truncatewords:20 }}</p>
+              <a href="{% url 'product_detail' product.sku %}" class="btn btn-primary">View Details</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p>No products found matching your criteria.</p>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  $(function() {
+    $("#product-name-search").autocomplete({
+      source: "{% url 'product_search_suggestions' %}",
+      minLength: 2,
+      select: function(event, ui) {
+        $("#product-name-search").val(ui.item.value);
+        return false;
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="text-center mb-4">{{ grandparent.name }}</h2>
+
+  {% for item in subcat_data %}
+    <div class="white-board mb-4 p-3"
+         style="border-radius:5px; box-shadow: 0 0 8px rgba(0,0,0,0.1);">
+      <h4 class="mb-3">{{ item.subcat.name }}</h4>
+      <div class="row">
+        {% for product in item.products %}
+          <div class="col-md-3 mb-4">
+            <div class="card h-100 text-center"
+                 style="border:none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius:5px;">
+              <div class="card-body">
+                {% if product.image %}
+                  <img src="{{ product.image.url }}"
+                       alt="{{ product.name }}"
+                       style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9;"
+                       class="mb-3">
+                {% else %}
+                  <img src="{% static 'images/default-placeholder.png' %}"
+                       alt="{{ product.name }}"
+                       style="width:100%; height:200px; object-fit: contain; background-color:#f9f9f9;"
+                       class="mb-3">
+                {% endif %}
+                <h6 class="fw-bold">
+                  <a href="{% url 'product_detail' product.sku %}"
+                     style="text-decoration: none; color: inherit;">
+                    {{ product.name }}
+                  </a>
+                </h6>
+                <!-- No Price shown. Just the Explore button. -->
+                <a href="{% url 'ask_for_discount' product.sku %}"
+                   class="btn btn-primary btn-sm rounded-pill mt-2">
+                  Explore All
+                </a>
+              </div>
+            </div>
+          </div>
+        {% empty %}
+          <div class="col-12">
+            <p>No products found under {{ item.subcat.name }}.</p>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+/* quotation_changelist.css */
+
+.model-quotation #changelist-filter {
+    /* Make the filter sidebar narrower so the table has more space */
+    width: 140px !important;
+    float: left !important;
+}
+
+.model-quotation .results {
+    /* Shift the table left so it lines up after the filter */
+    margin-left: 160px !important;
+    overflow-x: visible !important; /* If you prefer no horizontal scroll */
+}
+
+.model-quotation .results table {
+    /* Let the columns auto-size based on content */
+    table-layout: auto !important;
+    width: auto !important;
+    /* Optionally, reduce padding or whitespace if needed */
+}
+
+.model-quotation .results table th, 
+.model-quotation .results table td {
+    /* Make sure text doesn't wrap too soon */
+    white-space: nowrap; /* optional: can force no line breaks, or remove this if you want wrapping */
+}

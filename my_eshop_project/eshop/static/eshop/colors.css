@@ -1,0 +1,40 @@
+/*********************************************
+  Mitsubishi-Inspired Color Variables + Base
+**********************************************/
+
+:root {
+    --color-red: #ff0000;          /* Mitsubishi Red        */
+    --color-navy: #002b49;         /* Mitsubishi Navy       */
+    --color-marine: #004d8c;       /* Lighter navy accent   */
+    --color-light-neutral: #f5f6f7;/* Off-white background  */
+    --color-mid-gray: #888888;     /* Secondary text        */
+    --color-white: #ffffff;        /* Standard white        */
+  }
+  
+  /* Example base body styling (optional) */
+  /*
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: "Roboto Slab", serif;
+    background-color: var(--color-light-neutral);
+    color: #333; 
+  }
+  */
+  
+  /* Example classes using color variables */
+  /* .btn-navy, .btn-red, etc. */
+  .btn-navy {
+    background-color: var(--color-navy);
+    color: var(--color-white);
+    border-radius: 4px;
+    padding: 0.5rem 1rem;
+    transition: transform 0.3s;
+  }
+  .btn-navy:hover {
+    background-color: var(--color-marine);
+    transform: translateY(-2px);
+  }
+  
+  /* ...and so on for other custom classes... */
+  

@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="text-center mb-4">Discount Request Submitted</h2>
+
+  <!-- Updated Success Alert -->
+  <div class="alert alert-success text-center my-4">
+    <strong>Your discount request for Order No: {{ quotation.order_number|default:"N/A" }} has been successfully submitted!</strong>
+   <br>
+    You can also 
+    <a class="text-decoration-none" target="_blank"
+       href="https://api.whatsapp.com/send?text={{ 'Your discount request for Order No: '|add:quotation.order_number|urlencode }}">
+      contact us via WhatsApp
+    </a>
+    or 
+    <a class="text-decoration-none" 
+       href="mailto:?subject=Discount Request Details for Order No: {{ quotation.order_number }}&body=Your discount request for Order No: {{ quotation.order_number }} has been successfully submitted!">
+      email
+    </a>,
+    or 
+    {% if shareable_file_url %}
+      <a class="text-decoration-none" href="{{ shareable_file_url }}" download>
+        download the file
+      </a>
+    {% else %}
+      download the file (unavailable)
+    {% endif %}
+    !
+  </div>
+
+  <!-- Row with Customer Details & Quotation Info side by side -->
+  <div class="row">
+    <!-- Customer Details Card -->
+    <div class="col-md-6 mb-3">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0">Customer Details</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>Name:</strong> {{ quotation.customer_name|default:"N/A" }}</p>
+          <p><strong>Phone No:</strong> {{ quotation.phone_no|default:"N/A" }}</p>
+          <p><strong>Email:</strong> {{ quotation.email|default:"N/A" }}</p>
+          <p><strong>Delivery Address:</strong> {{ quotation.delivery_address|default:"N/A" }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quotation Info Card -->
+    <div class="col-md-6 mb-3">
+      <div class="card shadow-sm">
+        <div class="card-header bg-dark text-white">
+          <h5 class="mb-0">Quotation Info</h5>
+        </div>
+        <div class="card-body">
+          <p><strong>Date/Time:</strong> {% now 'Y-m-d H:i' %}</p>
+          <p><strong>Order Number:</strong> {{ quotation.order_number|default:"N/A" }}</p>
+          <p><strong>Subject:</strong> {{ quotation.subject|default:"N/A" }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quotation Details Table Section -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">Quotation Details</h5>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-bordered align-middle mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Product</th>
+            <th>Description</th>
+            <th>Quantity</th>
+            <th class="text-center">Unit Price</th>
+            <th class="text-center">Discount (%)</th>
+            <th class="text-center">Line Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if quotation %}
+            {% for line in quotation.lines.all %}
+              <tr>
+                <td>{{ line.product.name }}</td>
+                <td>{{ line.description }}</td>
+                <td>{{ line.quantity }}</td>
+                <td class="text-center">{{ line.unit_price|indian_format:2 }}</td>
+                <td class="text-center">{{ line.discount_percent|floatformat:2 }}</td>
+                <td class="text-center">{{ line.line_total|indian_format:2 }}</td>
+              </tr>
+            {% endfor %}
+            <tr>
+              <td colspan="5" class="text-end">
+                <strong>Total Amount:</strong>
+              </td>
+              <td class="text-center">
+                <strong>{{ quotation.total_amount|indian_format:2 }}</strong>
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="6" class="text-center">Quotation details not available.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Additional Notes Section -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">Additional Notes</h5>
+    </div>
+    <div class="card-body">
+      <textarea class="form-control" rows="4" name="notes" readonly>
+        {{ quotation.notes|default:"No additional notes." }}
+      </textarea>
+    </div>
+  </div>
+
+  <!-- Share and Download Section -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">Share Your Request</h5>
+    </div>
+    <div class="card-body">
+      <p>You can share your discount request details with others via WhatsApp or Email.</p>
+      {% if quotation %}
+        <a class="btn btn-success me-2" target="_blank"
+           href="https://api.whatsapp.com/send?text={{ 'Discount Request Details for Order No: ' | add:quotation.order_number | urlencode }}">
+          Share on WhatsApp
+        </a>
+        <a class="btn btn-primary" target="_blank"
+           href="mailto:?subject=Discount Request Details for Order No: {{ quotation.order_number }}&amp;body=Discount Request Details for Order No: {{ quotation.order_number }}">
+          Share via Email
+        </a>
+      {% else %}
+        <p>Quotation details not available for sharing.</p>
+      {% endif %}
+
+      <hr>
+      <h5>Details File</h5>
+      <p>You can also download the details file:</p>
+      {% if shareable_file_url %}
+        <a href="{{ shareable_file_url }}" class="btn btn-info" download>Download Details File</a>
+      {% else %}
+        <button class="btn btn-info" disabled>No file available</button>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Return to Product or Home Button -->
+  <div class="text-center">
+    {% if product and product.sku %}
+      <a href="{% url 'product_detail' product.sku %}" class="btn btn-secondary">Return to Product</a>
+    {% else %}
+      <a href="{% url 'home' %}" class="btn btn-secondary">Return to Home</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

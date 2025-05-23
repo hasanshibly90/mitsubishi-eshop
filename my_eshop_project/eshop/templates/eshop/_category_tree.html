@@ -1,0 +1,46 @@
+{% comment %}
+This partial handles one Category + *all* deeper children, using a
+Bootstrap collapse for each level. It's fully recursive:
+ - For the current `category`
+ - If it has children, loop each child, then *include this partial again* for that child.
+
+We pass:
+ - category: the current Category object
+ - parentAccordion: the ID of the main <ul> or outer container (e.g. "categoriesAccordion")
+{% endcomment %}
+
+<li class="list-group-item" style="color: black;">
+
+  <!-- Clickable heading for this category -->
+  <a data-bs-toggle="collapse"
+     href="#collapse{{ category.id }}"
+     role="button"
+     aria-expanded="false"
+     aria-controls="collapse{{ category.id }}"
+     style="color: black; text-decoration: none;">
+    <strong>{{ category.name }}</strong>
+  </a>
+
+  {% comment %}
+  If this category has children, we show them in a nested <ul> inside a "collapse" block.
+  We'll then recursively include `_category_tree.html` for each child.
+  {% endcomment %}
+  {% if category.children.exists %}
+    <div class="collapse"
+         id="collapse{{ category.id }}"
+         data-bs-parent="#{{ parentAccordion }}">
+      <ul class="list-group mt-2" style="margin-left: 15px;">
+
+        {% for child in category.children.all %}
+          {% comment %}
+          Each child is also a Category. If child has children, the partial will
+          handle it again. That is the recursion.
+          {% endcomment %}
+          {% include "eshop/_category_tree.html" with category=child parentAccordion=parentAccordion %}
+        {% endfor %}
+
+      </ul>
+    </div>
+  {% endif %}
+
+</li>

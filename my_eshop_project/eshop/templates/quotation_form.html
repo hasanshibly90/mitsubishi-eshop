@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% load static form_tags %}
+
+{% block content %}
+<div class="container my-4">
+  <h2 class="text-center mb-4">Multi-Line Discount Request</h2>
+
+  <!-- Display product name -->
+  <div class="mb-3 text-center">
+    <h5>Requesting Discount For: <strong>{{ product.name }}</strong></h5>
+  </div>
+
+  <form method="POST" class="card shadow p-4" style="max-width: 900px; margin: 0 auto;">
+    {% csrf_token %}
+
+    <!-- Quotation header form -->
+    <div class="mb-4">
+      <h4>Quotation Header</h4>
+      <div class="row g-3">
+        <div class="col-12">
+          {{ header_form.notes.label_tag }}
+          {{ header_form.notes|add_class:"form-control" }}
+        </div>
+      </div>
+    </div>
+
+    <!-- Include the management form for the line items -->
+    {{ formset.management_form }}
+
+    <!-- Line Items Table -->
+    <div class="mb-4">
+      <h4 class="mb-3">Line Items</h4>
+      <table class="table table-bordered align-middle" id="line-items-table">
+        <thead class="table-light">
+          <tr>
+            <th style="width: 20%;">Product</th>
+            <th>Description</th>
+            <th style="width: 10%;">Quantity</th>
+            <th style="width: 15%;">Unit Price</th>
+            <th style="width: 12%;">Discount (%)</th>
+            {% if formset.can_delete %}
+              <th style="width: 5%;">Remove</th>
+            {% endif %}
+          </tr>
+        </thead>
+        <tbody>
+          {% for line_form in formset %}
+            <tr>
+              <td>{{ line_form.product|add_class:"form-select" }}</td>
+              <td>{{ line_form.description|add_class:"form-control" }}</td>
+              <td>{{ line_form.quantity|add_class:"form-control" }}</td>
+              <td>{{ line_form.unit_price|add_class:"form-control" }}</td>
+              <td>{{ line_form.discount_percent|add_class:"form-control" }}</td>
+              {% if formset.can_delete %}
+                <td class="text-center">
+                  {{ line_form.DELETE }}
+                </td>
+              {% endif %}
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- "Add Another Line" button -->
+      <button type="button" class="btn btn-secondary" id="add-line-btn">
+        Add Another Line
+      </button>
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary px-4">Submit</button>
+    </div>
+  </form>
+</div>
+
+<!-- Hidden "empty form" row for cloning -->
+<table style="display: none;">
+  <tbody>
+    <tr id="empty-form-row">
+      <td>__product__</td>
+      <td>__description__</td>
+      <td>__quantity__</td>
+      <td>__unit_price__</td>
+      <td>__discount_percent__</td>
+      {% if formset.can_delete %}
+        <td class="text-center">__delete__</td>
+      {% endif %}
+    </tr>
+  </tbody>
+</table>
+
+<script>
+  (function() {
+    // The button to add new lines
+    const addLineBtn = document.getElementById("add-line-btn");
+    // The table body where new lines will be appended
+    const tableBody = document.querySelector("#line-items-table tbody");
+    // The management form's TOTAL_FORMS field
+    const totalForms = document.getElementById("id_form-TOTAL_FORMS");
+
+    // The hidden row template
+    const emptyFormTemplate = document.getElementById("empty-form-row").innerHTML;
+
+    // Event: Add another line
+    addLineBtn.addEventListener("click", function() {
+      // Current form count
+      let formIndex = parseInt(totalForms.value);
+
+      // Replace __prefix__ in the template with the current index
+      let newRowHtml = emptyFormTemplate.replace(/__prefix__/g, formIndex);
+
+      // Insert the new row into the table
+      let newRow = document.createElement("tr");
+      newRow.innerHTML = newRowHtml;
+      tableBody.appendChild(newRow);
+
+      // Increment the total forms count so Django knows there's a new form
+      totalForms.value = formIndex + 1;
+    });
+  })();
+</script>
+{% endblock %}

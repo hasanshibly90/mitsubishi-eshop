@@ -1,0 +1,19 @@
+{% for product in products %}
+  <div class="col-md-3 mb-4">
+    <div class="card h-100 text-center" style="border: none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius: 5px;">
+      <div class="card-body">
+        {% if product.image %}
+          <img src="{{ product.image.url }}" alt="{{ product.name }}"
+               style="width:100%; height:200px; object-fit:contain; background-color:#f9f9f9; border-radius:5px;"
+               class="mb-3">
+        {% else %}
+          <img src="{% static 'images/default-placeholder.png' %}" alt="No Image"
+               style="width:100%; height:200px; object-fit:contain; background-color:#f9f9f9; border-radius:5px;"
+               class="mb-3">
+        {% endif %}
+        <h6 style="font-weight:600;">{{ product.name }}</h6>
+        <p style="font-size:1.2rem; font-weight:bold;">৳{{ product.discounted_price }}</p>
+      </div>
+    </div>
+  </div>
+{% endfor %}

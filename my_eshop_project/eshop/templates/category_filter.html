@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %} {# if needed for Indian format, etc. #}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="text-center mb-3">All products in {{ cat_name }}</h2>
+
+  <!-- Example row to display each product -->
+  <div class="row">
+    {% for product in page_obj %}
+      <div class="col-md-3 mb-4">
+        <div class="card h-100">
+          {% if product.image %}
+            <img src="{{ product.image.url }}" class="card-img-top" alt="{{ product.name }}">
+          {% endif %}
+          <div class="card-body">
+            <h6>{{ product.name }}</h6>
+            <p>Price: {{ product.original_price|indian_format }}</p>
+            <a href="{% url 'product_detail' product.sku %}" class="btn btn-primary btn-sm">View</a>
+          </div>
+        </div>
+      </div>
+    {% empty %}
+      <div class="col">
+        <p>No products found in {{ cat_name }}</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination controls -->
+  {% if page_obj.has_other_pages %}
+    <nav aria-label="Page navigation example">
+      <ul class="pagination justify-content-center">
+        
+        {# Previous Page Link #}
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">&laquo;</span>
+        </li>
+        {% endif %}
+
+        {# Page Number Links #}
+        {% for i in page_obj.paginator.page_range %}
+          {% if i == page_obj.number %}
+          <li class="page-item active">
+            <span class="page-link">{{ i }}</span>
+          </li>
+          {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+          </li>
+          {% endif %}
+        {% endfor %}
+
+        {# Next Page Link #}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+        {% else %}
+        <li class="page-item disabled">
+          <span class="page-link">&raquo;</span>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

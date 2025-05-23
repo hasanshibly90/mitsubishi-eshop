@@ -1,0 +1,32 @@
+
+# Python bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django SQLite database
+*.sqlite3
+
+# Virtual environment
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# VSCode editor settings
+.vscode/
+
+# Mac and Linux file system files
+.DS_Store
+.idea/
+
+# Log files
+*.log
+
+# Staticfiles and media (if auto-generated)
+staticfiles/
+media/
+
+# Secret files
+.env

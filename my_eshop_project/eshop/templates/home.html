@@ -1,0 +1,418 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %}
+
+{% block content %}
+<style>
+  /****************************************
+   * Mitsubishi-Inspired Color Variables
+   ****************************************/
+  :root {
+    --color-red: #ff0000;           /* Mitsubishi Red */
+    --color-navy: #002b49;          /* Mitsubishi Navy */
+    --color-marine: #004d8c;        /* Lighter navy accent */
+    --color-light-neutral: #f5f6f7; /* Off-white / light gray background */
+    --color-mid-gray: #888888;      /* Secondary text color */
+    --color-white: #ffffff;         /* Standard White */
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+  .collapse,
+  .collapsing,
+  .collapse.show {
+    transition: height 0.6s ease !important;
+  }
+
+  /*************************************************
+   * Simply Gorgeous Series Card Styling
+   *************************************************/
+  .series-card {
+    background: linear-gradient(180deg, #ffffff, #f8f9fa); /* slight gradient */
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    overflow: hidden;
+  }
+  .series-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  }
+
+  .series-card-header {
+    background: linear-gradient(90deg, var(--color-navy), var(--color-marine));
+    color: var(--color-white);
+    text-align: center;
+    padding: 0.75rem 1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    box-shadow: inset 0 -1px 0 rgba(255,255,255,0.15);
+  }
+
+  /* Updated to make the image more dynamic and centered */
+  .series-card-img {
+    height: 200px; /* or another fixed height you prefer */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f9f9f9;
+    padding: 1.25rem;
+  }
+  .series-card-img img {
+    max-height: 100%;
+    max-width: 100%;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .series-card .card-body {
+    padding: 1.25rem;
+    text-align: center;
+  }
+
+  .btn-explore {
+    background-color: var(--color-navy) !important;
+    color: var(--color-white) !important;
+    text-decoration: none !important;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 0.5rem 1.5rem !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1) !important;
+    transition: background 0.3s, transform 0.3s !important;
+    cursor: pointer !important;
+    display: inline-block !important;
+  }
+  .btn-explore:hover {
+    background-color: var(--color-marine) !important;
+    transform: translateY(-2px) !important;
+    color: var(--color-white) !important;
+    text-decoration: none !important;
+  }
+</style>
+
+<!-- 1) Top Section: Categories (Left) & Banner (Right) -->
+<div class="white-board mb-4" style="border-radius:5px;">
+  <div class="row">
+    <!-- Left Column: Categories -->
+    <div class="col-md-4">
+      <div class="card" style="border:none; box-shadow: 0 0 8px rgba(0,0,0,0.1); border-radius:5px;">
+        <div class="card-body">
+          <h5 class="card-title">Categories</h5>
+          <ul class="list-group" id="categoriesAccordion">
+            {% for cat in categories %}
+              <li class="list-group-item" style="color: black;">
+                <a data-bs-toggle="collapse"
+                   href="#collapse{{ cat.id }}"
+                   role="button"
+                   aria-expanded="false"
+                   aria-controls="collapse{{ cat.id }}"
+                   style="color: black; text-decoration: none;"
+                   data-bs-parent="#categoriesAccordion">
+                  <strong>{{ cat.name }}</strong>
+                </a>
+                {% if cat.children.exists %}
+                  <div class="collapse"
+                       id="collapse{{ cat.id }}"
+                       data-bs-parent="#categoriesAccordion">
+                    <ul class="list-group mt-2" style="margin-left: 15px;">
+                      {% for subcat in cat.children.all %}
+                        <li class="list-group-item" style="color: black;">
+                          {% if subcat.children.exists %}
+                            <a data-bs-toggle="collapse"
+                               href="#collapseSub{{ subcat.id }}"
+                               role="button"
+                               aria-expanded="false"
+                               aria-controls="collapseSub{{ subcat.id }}"
+                               style="color: black; text-decoration: none;"
+                               data-bs-parent="#collapse{{ cat.id }}">
+                              {{ subcat.name }}
+                            </a>
+                            <div class="collapse"
+                                 id="collapseSub{{ subcat.id }}"
+                                 data-bs-parent="#collapse{{ cat.id }}">
+                              <ul class="list-group mt-2" style="margin-left: 15px;">
+                                {% for subsubcat in subcat.children.all %}
+                                  <li class="list-group-item" style="color: black;">
+                                    <a href="{% url 'category_filter' subsubcat.name %}"
+                                       style="text-decoration: none; color: black;"
+                                       onclick="event.stopPropagation();">
+                                      {{ subsubcat.name }}
+                                    </a>
+                                  </li>
+                                {% endfor %}
+                              </ul>
+                            </div>
+                          {% else %}
+                            {% if subcat.name == "VFD" %}
+                              <a href="#vfd-section"
+                                 style="text-decoration: none; color: black;"
+                                 onclick="event.stopPropagation();">
+                                {{ subcat.name }}
+                              </a>
+                            {% elif subcat.name == "PLC" %}
+                              <a href="#plc-section"
+                                 style="text-decoration: none; color: black;"
+                                 onclick="event.stopPropagation();">
+                                {{ subcat.name }}
+                              </a>
+                            {% elif subcat.name == "HMI" %}
+                              <a href="#hmi-section"
+                                 style="text-decoration: none; color: black;"
+                                 onclick="event.stopPropagation();">
+                                {{ subcat.name }}
+                              </a>
+                            {% elif subcat.name == "SERVO" %}
+                              <a href="#servo-section"
+                                 style="text-decoration: none; color: black;"
+                                 onclick="event.stopPropagation();">
+                                {{ subcat.name }}
+                              </a>
+                            {% else %}
+                              <a href="{% url 'category_filter' subcat.name %}"
+                                 style="text-decoration: none; color: black;"
+                                 onclick="event.stopPropagation();">
+                                {{ subcat.name }}
+                              </a>
+                            {% endif %}
+                          {% endif %}
+                        </li>
+                      {% endfor %}
+                    </ul>
+                  </div>
+                {% endif %}
+              </li>
+            {% empty %}
+              <li class="list-group-item">No categories found</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Column: Banner -->
+    <div class="col-md-8">
+      <div class="banner-container" style="overflow:hidden; border-radius:5px;">
+        {% if banner and banner.image %}
+          <img src="{{ banner.image.url }}" alt="{{ banner.title }}" style="width:100%; height:auto;">
+        {% else %}
+          <img src="{% static 'images/banner.jpg' %}" alt="Default Banner" style="width:100%; height:auto;">
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =============== VFD SECTION =============== -->
+{% if parent_categories %}
+<div class="white-board mb-4" style="border-radius:5px; box-shadow: 0 0 8px rgba(0,0,0,0.1);">
+  <div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mb-0" style="color: #555;">Variable Frequency Drives - Inverters</h2>
+      <a href="{% url 'all_vfd_inverters' %}" class="btn-explore">
+        View all
+      </a>
+    </div>
+  </div>
+</div>
+<div class="container my-4">
+  <div class="row text-center">
+    {% for parent in parent_categories %}
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="series-card h-100">
+          <div class="series-card-header">
+            <h5 class="mb-0">{{ parent.name }}</h5>
+          </div>
+          <div class="series-card-img">
+            {% if parent.name == "D SERIES" %}
+              <img src="{% static 'images/d-series.jpg' %}" alt="D SERIES">
+            {% elif parent.name == "E SERIES" %}
+              <img src="{% static 'images/e-series.jpg' %}" alt="E SERIES">
+            {% elif parent.name == "F SERIES" %}
+              <img src="{% static 'images/f-series.jpg' %}" alt="F SERIES">
+            {% elif parent.name == "A SERIES" %}
+              <img src="{% static 'images/a-series.jpg' %}" alt="A SERIES">
+            {% else %}
+              <img src="{% static 'images/placeholder-parent.jpg' %}" alt="{{ parent.name }}">
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <a href="{% url 'parent_detail' parent.slug %}" class="btn-explore">
+              View all
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- =============== PLC SECTION =============== -->
+{% if plc_parent_categories %}
+<div class="white-board mb-4" id="plc-section" style="border-radius:5px; box-shadow: 0 0 8px rgba(0,0,0,0.1);">
+  <div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mb-0" style="color: #555;">Programmable Logic Controllers (PLC)</h2>
+      <a href="{% url 'parent_detail' plc_parent_categories.0.slug %}" class="btn-explore">
+        View all
+      </a>
+    </div>
+  </div>
+</div>
+<div class="container my-4">
+  <div class="row text-center">
+    {% for parent in plc_parent_categories %}
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="series-card h-100">
+          <div class="series-card-header">
+            <h5 class="mb-0">{{ parent.name }}</h5>
+          </div>
+          <div class="series-card-img">
+            {% if parent.name == "MELSEC-F" %}
+              <img src="{% static 'images/melsec-f.jpg' %}" alt="MELSEC-F">
+            {% elif parent.name == "MELSEC iQ-F" %}
+              <img src="{% static 'images/melsec-iq-f.jpg' %}" alt="MELSEC iQ-F">
+            {% elif parent.name == "MELSEC-Q" %}
+              <img src="{% static 'images/melsec-q.jpg' %}" alt="MELSEC-Q">
+            {% elif parent.name == "MELSEC-A" %}
+              <img src="{% static 'images/melsec-a.jpg' %}" alt="MELSEC-A">
+            {% else %}
+              <img src="{% static 'images/placeholder-parent.jpg' %}" alt="{{ parent.name }}">
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <a href="{% url 'parent_detail' parent.slug %}" class="btn-explore">
+              View all
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- =============== HMI SECTION =============== -->
+{% if hmi_parent_categories %}
+<div class="white-board mb-4" id="hmi-section" style="border-radius:5px; box-shadow: 0 0 8px rgba(0,0,0,0.1);">
+  <div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mb-0" style="color: #555;">Human Machine Interfaces (HMI)</h2>
+      <a href="{% url 'parent_detail' hmi_parent_categories.0.slug %}" class="btn-explore">
+        View all
+      </a>
+    </div>
+  </div>
+</div>
+<div class="container my-4">
+  <div class="row text-center">
+    {% for parent in hmi_parent_categories %}
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="series-card h-100">
+          <div class="series-card-header">
+            <h5 class="mb-0">{{ parent.name }}</h5>
+          </div>
+          <div class="series-card-img">
+            {% if parent.name == "GOT2000 Series" %}
+              <img src="{% static 'images/got2000-series.jpg' %}" alt="GOT2000 Series">
+            {% elif parent.name == "GOT SIMPLE Series" %}
+              <img src="{% static 'images/got-simple-series.jpg' %}" alt="GOT SIMPLE Series">
+            {% elif parent.name == "GT SoftGOT" %}
+              <img src="{% static 'images/gt-softgot.jpg' %}" alt="GT SoftGOT">
+            {% elif parent.name == "GOT1000 Series" %}
+              <img src="{% static 'images/got1000-series.jpg' %}" alt="GOT1000 Series">
+            {% else %}
+              <img src="{% static 'images/placeholder-parent.jpg' %}" alt="{{ parent.name }}">
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <a href="{% url 'parent_detail' parent.slug %}" class="btn-explore">
+              View all
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- =============== SERVO SECTION =============== -->
+{% if servo_parent_categories %}
+<div class="white-board mb-4" id="servo-section" style="border-radius:5px; box-shadow: 0 0 8px rgba(0,0,0,0.1);">
+  <div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <h2 class="mb-0" style="color: #555;">Servo Systems</h2>
+      <a href="{% url 'parent_detail' servo_parent_categories.0.slug %}" class="btn-explore">
+        View all
+      </a>
+    </div>
+  </div>
+</div>
+<div class="container my-4">
+  <div class="row text-center">
+    {% for parent in servo_parent_categories %}
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="series-card h-100">
+          <div class="series-card-header">
+            <h5 class="mb-0">{{ parent.name }}</h5>
+          </div>
+          <div class="series-card-img">
+            {% if parent.name == "MELSERVO-J4" %}
+              <img src="{% static 'images/melservo-j4.jpg' %}" alt="MELSERVO-J4">
+            {% elif parent.name == "MELSERVO-J5" %}
+              <img src="{% static 'images/melservo-j5.jpg' %}" alt="MELSERVO-J5">
+            {% elif parent.name == "MELSERVO-JE" %}
+              <img src="{% static 'images/melservo-je.jpg' %}" alt="MELSERVO-JE">
+            {% elif parent.name == "MELSERVO-JET" %}
+              <img src="{% static 'images/melservo-jet.jpg' %}" alt="MELSERVO-JET">
+            {% else %}
+              <img src="{% static 'images/placeholder-parent.jpg' %}" alt="{{ parent.name }}">
+            {% endif %}
+          </div>
+          <div class="card-body">
+            <a href="{% url 'parent_detail' parent.slug %}" class="btn-explore">
+              View all
+            </a>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<!-- Force-close siblings on show.bs.collapse -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  let collapses = document.querySelectorAll('.collapse');
+  collapses.forEach(function(collapseEl) {
+    collapseEl.addEventListener('show.bs.collapse', function () {
+      let newlyOpened = this;
+      let parentSelector = newlyOpened.getAttribute('data-bs-parent');
+      if (parentSelector) {
+        let parentEl = document.querySelector(parentSelector);
+        if (parentEl) {
+          let openSiblings = parentEl.querySelectorAll('.collapse.show');
+          openSiblings.forEach(function(sib) {
+            if (sib !== newlyOpened) {
+              sib.classList.remove('show');
+              let link = parentEl.querySelector(`[href="#${sib.id}"]`);
+              if (link) {
+                link.setAttribute('aria-expanded', 'false');
+              }
+            }
+          });
+        }
+      }
+    });
+  });
+});
+</script>
+
+{% endblock %}

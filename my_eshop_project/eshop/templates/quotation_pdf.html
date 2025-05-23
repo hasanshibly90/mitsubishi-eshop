@@ -1,0 +1,145 @@
+{% load custom_filters %}
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Quotation PDF</title>
+    <!-- Minimal inline CSS for PDF rendering -->
+    <style>
+      /* Global Styling */
+      body {
+        font-family: "Helvetica", Arial, sans-serif;
+        font-size: 14px;
+        color: #333;
+        margin: 0;
+        padding: 0;
+      }
+      h1, h2, h3, h4, h5 {
+        margin: 0;
+        padding: 0;
+      }
+      p {
+        margin: 4px 0;
+      }
+      /* Header Section */
+      .header {
+        background-color: #f8f9fa; /* light grayish background */
+        padding: 20px;
+        text-align: center;
+        border-bottom: 2px solid #ccc;
+      }
+      .header h1 {
+        font-size: 24px;
+        margin: 0;
+      }
+      /* Info & Details Sections */
+      .info-section, .details-section, .notes-section {
+        margin: 20px;
+      }
+      .info-section h2, .details-section h2, .notes-section h2 {
+        margin-bottom: 10px;
+        font-size: 18px;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 5px;
+      }
+      /* Table Styling */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      table thead {
+        background-color: #f2f2f2;
+      }
+      table th, table td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: left;
+        vertical-align: middle;
+      }
+      .text-right {
+        text-align: right;
+      }
+      /* Footer */
+      .footer {
+        margin: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #999;
+        border-top: 1px solid #ccc;
+        padding-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- PDF Header -->
+    <div class="header">
+      {# Optional: Insert a logo image here if desired #}
+      {# <img src="path/to/logo.png" alt="Logo" style="height: 50px;"> #}
+      <h1>Quotation</h1>
+    </div>
+
+    <!-- Customer Details -->
+    <div class="info-section">
+      <h2>Customer Details</h2>
+      <p><strong>Name:</strong> {{ quotation.customer_name }}</p>
+      <p><strong>Phone:</strong> {{ quotation.phone_no }}</p>
+      <p><strong>Email:</strong> {{ quotation.email }}</p>
+      <p><strong>Address:</strong> {{ quotation.delivery_address }}</p>
+    </div>
+
+    <!-- Quotation Info -->
+    <div class="info-section">
+      <h2>Quotation Info</h2>
+      <p><strong>Date:</strong> {{ quotation.created_at|date:"Y-m-d" }}</p>
+      <p><strong>Order No:</strong> {{ quotation.order_number }}</p>
+      <p><strong>Subject:</strong> {{ quotation.subject }}</p>
+    </div>
+
+    <!-- Quotation Details -->
+    <div class="details-section">
+      <h2>Quotation Details</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Description</th>
+            <th>Qty</th>
+            <th>Unit Price</th>
+            <th>Discount (%)</th>
+            <th>Line Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for line in quotation.lines.all %}
+          <tr>
+            <td>{{ line.product.name }}</td>
+            <td>{{ line.description }}</td>
+            <td>{{ line.quantity }}</td>
+            <td>{{ line.unit_price|indian_format:2 }}</td>
+            <td>{{ line.discount_percent|floatformat:2 }}</td>
+            <td>{{ line.line_total|indian_format:2 }}</td>
+          </tr>
+          {% endfor %}
+          <tr>
+            <td colspan="5" class="text-right"><strong>Total Amount:</strong></td>
+            <td><strong>{{ quotation.total_amount|indian_format:2 }}</strong></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Additional Notes -->
+    <div class="notes-section">
+      <h2>Additional Notes</h2>
+      <p>{{ quotation.notes|default:"No additional notes." }}</p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p>Thank you for choosing our services!</p>
+    </div>
+
+  </body>
+</html>

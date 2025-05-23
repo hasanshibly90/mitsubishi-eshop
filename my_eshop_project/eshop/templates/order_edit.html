@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load custom_filters %}
+
+{% block content %}
+<div class="container my-5">
+
+  <!-- Order Header Card -->
+  <div class="card shadow-lg mb-4">
+    <div class="card-header bg-primary text-white">
+      <h2 class="mb-0">Edit Order: {{ order.order_number }}</h2>
+    </div>
+    <div class="card-body">
+      <form method="POST" id="order-edit-form">
+        {% csrf_token %}
+        
+        <!-- Row 1: Status & Customer Name -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold mb-1">{{ form.status.label }}</label>
+            {{ form.status|add_class:"form-select" }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold mb-1">{{ form.customer_name.label }}</label>
+            {{ form.customer_name|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <!-- Row 2: Phone No & Email -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label fw-bold mb-1">{{ form.phone_no.label }}</label>
+            {{ form.phone_no|add_class:"form-control" }}
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold mb-1">{{ form.email.label }}</label>
+            {{ form.email|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <!-- Row 3: Delivery Address -->
+        <div class="row g-3 mb-4">
+          <div class="col-12">
+            <label class="form-label fw-bold mb-1">{{ form.delivery_address.label }}</label>
+            {{ form.delivery_address|add_class:"form-control" }}
+          </div>
+        </div>
+
+        <!-- Line Items Card -->
+        <div class="card shadow-sm mb-4">
+          <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0">Line Items</h5>
+          </div>
+          <div class="card-body p-0">
+            {{ formset.management_form }}
+            <table class="table table-bordered table-sm mb-0" id="line-items-table">
+              <thead class="table-light">
+                <tr>
+                  <th style="width: 200px;">Product</th>
+                  <th style="width: 180px;">Description</th>
+                  <th class="text-center" style="width: 80px;">Quantity</th>
+                  <th class="text-end" style="width: 120px;">Unit Price</th>
+                  <th class="text-center" style="width: 80px;">Discount (%)</th>
+                  {% if formset.can_delete %}
+                    <th style="width: 60px;">Remove</th>
+                  {% endif %}
+                </tr>
+              </thead>
+              <tbody id="formset-body">
+                {% for lineform in formset %}
+                  <tr>
+                    <td>
+                      {{ lineform.id }}
+                      {{ lineform.product }}
+                    </td>
+                    <td>{{ lineform.description }}</td>
+                    <td class="text-center">
+                      {{ lineform.quantity|add_class:"form-control text-center" }}
+                    </td>
+                    <td class="text-end align-middle">
+                      {{ lineform.unit_price.as_hidden }}
+                      <input type="text"
+                             class="form-control text-end"
+                             value="{{ lineform.unit_price.value|indian_format }}"
+                             readonly>
+                    </td>
+                    <td class="text-center">
+                      {{ lineform.discount_percent|add_class:"form-control text-center" }}
+                    </td>
+                    {% if formset.can_delete %}
+                      <td class="text-center">
+                        <!-- Hide the default delete checkbox -->
+                        {{ lineform.DELETE|add_class:"d-none" }}
+                        <!-- Clickable red "X" icon -->
+                        <span class="text-danger fw-bold" style="cursor:pointer;"
+                              onclick="
+                                this.parentElement.querySelector('input[type=checkbox]').checked = true;
+                                this.closest('tr').style.display = 'none';
+                                recalcTotal();
+                              ">
+                          X
+                        </span>
+                      </td>
+                    {% endif %}
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer text-end">
+            <strong>Total: </strong><span id="grand-total">0.00</span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center">
+          <button type="button" class="btn btn-outline-secondary" id="add-line-btn">+ Add Another Line</button>
+          <div>
+            <button type="submit" class="btn btn-primary me-2">Save Changes</button>
+            <a href="{% url 'order_management' %}" class="btn btn-secondary">Cancel</a>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden Template Row -->
+<table style="display:none;">
+  <tbody>
+    <tr id="empty-form-row">
+      <td>
+        {{ formset.empty_form.id }}
+        {{ formset.empty_form.product }}
+      </td>
+      <td>{{ formset.empty_form.description }}</td>
+      <td class="text-center">
+        {{ formset.empty_form.quantity|add_class:"form-control text-center" }}
+      </td>
+      <td class="text-end align-middle">
+        {{ formset.empty_form.unit_price.as_hidden }}
+        <input type="text"
+               class="form-control text-end"
+               value="{{ formset.empty_form.unit_price.value|indian_format }}"
+               readonly>
+      </td>
+      <td class="text-center">
+        {{ formset.empty_form.discount_percent|add_class:"form-control text-center" }}
+      </td>
+      {% if formset.can_delete %}
+        <td class="text-center">
+          {{ formset.empty_form.DELETE|add_class:"d-none" }}
+          <span class="text-danger fw-bold" style="cursor:pointer;"
+                onclick="
+                  this.parentElement.querySelector('input[type=checkbox]').checked = true;
+                  this.closest('tr').style.display = 'none';
+                  recalcTotal();
+                ">
+            X
+          </span>
+        </td>
+      {% endif %}
+    </tr>
+  </tbody>
+</table>
+
+<script>
+  // Mapping of product->price from view
+  const productPrices = {{ product_prices_json|safe }};
+
+  // Function to convert a number string to Indian format (e.g., 100000 -> 1,00,000.00)
+  function toIndianFormat(numStr) {
+    let [integer, decimal] = parseFloat(numStr).toFixed(2).split(".");
+    let last3 = integer.slice(-3);
+    let rest = integer.slice(0, -3);
+    if (rest) {
+      last3 = "," + last3;
+      rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ",");
+    }
+    return rest + last3 + "." + decimal;
+  }
+
+  // Recalculate the grand total by iterating only over visible rows
+  function recalcTotal() {
+    let total = 0;
+    document.querySelectorAll("#formset-body tr").forEach(row => {
+      // Skip rows that are hidden (i.e., removed)
+      if (row.offsetParent === null) {
+        return;
+      }
+      const qty = parseFloat(row.querySelector("input.quantity-input").value) || 0;
+      const price = parseFloat(row.querySelector("input[name$='-unit_price']").value) || 0;
+      const discount = parseFloat(row.querySelector("input.discount-input").value) || 0;
+      const lineTotal = qty * price;
+      const discountAmount = lineTotal * (discount / 100);
+      total += (lineTotal - discountAmount);
+    });
+    document.getElementById("grand-total").textContent = toIndianFormat(total);
+  }
+
+  // Initialize a row: Bind events for product selection and input changes
+  function initializeRow(row) {
+    const productSelect = row.querySelector("select.product-select");
+    const realPriceInput = row.querySelector("input[name$='-unit_price']");
+    const displayPriceInput = row.querySelector("input[type='text'][readonly]");
+    const quantityInput = row.querySelector("input.quantity-input");
+    const discountInput = row.querySelector("input.discount-input");
+
+    if (productSelect) {
+      productSelect.addEventListener("change", function() {
+        const prodId = this.value;
+        if (prodId && productPrices[prodId]) {
+          realPriceInput.value = productPrices[prodId];
+          displayPriceInput.value = toIndianFormat(productPrices[prodId]);
+        } else {
+          realPriceInput.value = 0;
+          displayPriceInput.value = "0.00";
+        }
+        recalcTotal();
+      });
+    }
+    if (quantityInput) {
+      quantityInput.addEventListener("input", recalcTotal);
+    }
+    if (discountInput) {
+      discountInput.addEventListener("input", recalcTotal);
+    }
+  }
+
+  // Initialize existing rows on page load
+  document.querySelectorAll("#formset-body tr").forEach(row => {
+    initializeRow(row);
+  });
+
+  // "Add Another Line" functionality
+  const totalFormsInput = document.getElementById("id_lines-TOTAL_FORMS");
+  const addLineBtn = document.getElementById("add-line-btn");
+  const formsetBody = document.getElementById("formset-body");
+  const emptyFormRow = document.getElementById("empty-form-row");
+
+  addLineBtn.addEventListener("click", function() {
+    const formIndex = parseInt(totalFormsInput.value);
+    const newRow = emptyFormRow.cloneNode(true);
+    newRow.removeAttribute("id");
+    newRow.style.display = "";
+    const regex = new RegExp('__prefix__', 'g');
+    newRow.innerHTML = newRow.innerHTML.replace(regex, formIndex);
+    formsetBody.appendChild(newRow);
+    totalFormsInput.value = formIndex + 1;
+    initializeRow(newRow);
+    recalcTotal();
+  });
+
+  // Calculate initial total on page load
+  recalcTotal();
+</script>
+{% endblock %}

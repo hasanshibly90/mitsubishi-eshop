@@ -1,0 +1,45 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block object-tools-items %}
+  {{ block.super }}
+  {% if change and original %}
+    <li>
+      <a href="{% url 'admin:eshop_product_clone' original.pk %}"
+         onclick="return promptCloneSKU(this);">
+         Clone this Product
+      </a>
+    </li>
+  {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <script type="text/javascript">
+    function promptCloneSKU(link) {
+      // Ask only for the new SKU
+      var newSku = prompt("Enter NEW SKU for the cloned product:");
+      if (!newSku || !newSku.trim()) {
+        alert("SKU is required.");
+        return false;
+      }
+      // Append the SKU to the link as a query parameter
+      var params = "?sku=" + encodeURIComponent(newSku.trim());
+      link.href += params;
+      return true;
+    }
+
+    // Example: If you have client-side show/hide logic for category fields
+    document.addEventListener('DOMContentLoaded', function() {
+      var catSelect = document.getElementById('id_category');
+      if (!catSelect) return;
+
+      function toggleFields() {
+        // Put your show/hide logic here if needed
+      }
+
+      catSelect.addEventListener('change', toggleFields);
+      toggleFields();
+    });
+  </script>
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+{% load static %}
+{% load custom_filters %} {# If you need your 'indian_format' filter, ensure it's in custom_filters #}
+
+{% block content %}
+<div class="container my-5">
+
+  <!-- Page Title -->
+  <div class="row mb-4">
+    <div class="col text-center">
+      <h2 class="fw-bold">Order Details</h2>
+    </div>
+  </div>
+
+  <!-- Order & Customer Summary -->
+  <div class="row g-4">
+    <!-- Order Info Card -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Order Information</h5>
+        </div>
+        <div class="card-body">
+          <!-- Order Number -->
+          <div class="row mb-2">
+            <label class="col-4 fw-bold">Order Number:</label>
+            <div class="col-8">
+              {{ quotation.order_number }}
+            </div>
+          </div>
+          <!-- Status -->
+          <div class="row mb-2">
+            <label class="col-4 fw-bold">Status:</label>
+            <div class="col-8">
+              {{ quotation.get_status_display }}
+            </div>
+          </div>
+          <!-- Created At -->
+          <div class="row mb-2">
+            <label class="col-4 fw-bold">Created At:</label>
+            <div class="col-8">
+              {{ quotation.created_at|date:"Y-m-d H:i" }}
+            </div>
+          </div>
+          {% if quotation.notes %}
+          <div class="row mb-2">
+            <label class="col-4 fw-bold">Notes:</label>
+            <div class="col-8">
+              {{ quotation.notes }}
+            </div>
+          </div>
+          {% endif %}
+          <!-- Total Amount (right-aligned, Indian format) -->
+          <div class="row">
+            <label class="col-4 fw-bold">Total Amount:</label>
+            <div class="col-8 text-end">
+              {{ quotation.total_amount|indian_format }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Customer Info Card -->
+    <div class="col-md-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light">
+          <h5 class="mb-0">Customer Information</h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-2">
+            <label class="col-4 fw-bold">Name:</label>
+            <div class="col-8">
+              {% if quotation.customer_name %}
+                {{ quotation.customer_name }}
+              {% elif quotation.customer %}
+                {{ quotation.customer.get_full_name|default:quotation.customer.username }}
+              {% else %}
+                Anonymous
+              {% endif %}
+            </div>
+          </div>
+          <div class="row mb-2">
+            <label class="col-4 fw-bold">Phone No:</label>
+            <div class="col-8">
+              {{ quotation.phone_no|default:"N/A" }}
+            </div>
+          </div>
+          {% if quotation.email %}
+          <div class="row mb-2">
+            <label class="col-4 fw-bold">Email:</label>
+            <div class="col-8">
+              {{ quotation.email }}
+            </div>
+          </div>
+          {% endif %}
+          {% if quotation.delivery_address %}
+          <div class="row mb-2">
+            <label class="col-4 fw-bold">Delivery Address:</label>
+            <div class="col-8">
+              {{ quotation.delivery_address }}
+            </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Line Items Section -->
+  <div class="row mt-5">
+    <div class="col">
+      <h5 class="fw-bold mb-3">Order Items</h5>
+      <div class="table-responsive">
+        <table class="table table-bordered table-striped align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Product</th>
+              <th class="text-end" style="width: 10%;">Quantity</th>
+              <th class="text-end" style="width: 15%;">Unit Price</th>
+              <th class="text-end" style="width: 10%;">Discount (%)</th>
+              <th class="text-end" style="width: 15%;">Line Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for line in lines %}
+            <tr>
+              <td>{{ line.product.name }}</td>
+              <td class="text-end">{{ line.quantity }}</td>
+              <td class="text-end">{{ line.unit_price|indian_format }}</td>
+              <td class="text-end">{{ line.discount_percent }}</td>
+              <td class="text-end">{{ line.line_total|indian_format }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-center">No items in this order.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Buttons Row -->
+  <div class="row mt-4">
+    <div class="col d-flex justify-content-end gap-2">
+      {# 1) WhatsApp Button #}
+      {# Use cut:" " to remove spaces from phone_no if needed #}
+      {% if quotation.phone_no %}
+      <a class="btn btn-success"
+         href="https://wa.me/{{ quotation.phone_no|cut:" " }}?text=Hello!%20Your%20Order%20Number%20is%20{{ quotation.order_number }}."
+         target="_blank">
+        <i class="bi bi-whatsapp"></i> WhatsApp
+      </a>
+      {% else %}
+      <button class="btn btn-success" disabled title="No phone number">
+        <i class="bi bi-whatsapp"></i> WhatsApp
+      </button>
+      {% endif %}
+
+      {# 2) Email Button #}
+      {% if quotation.email %}
+      <a class="btn btn-warning"
+         href="mailto:{{ quotation.email }}?subject=Order%20{{ quotation.order_number }}&body=Hello%2C%0D%0AHere%20are%20the%20details%20of%20your%20order%3A%20{{ quotation.order_number }}.">
+        <i class="bi bi-envelope-fill"></i> Email
+      </a>
+      {% else %}
+      <button class="btn btn-warning" disabled title="No email address">
+        <i class="bi bi-envelope-fill"></i> Email
+      </button>
+      {% endif %}
+
+      {# 3) Download PDF Button #}
+      {% if shareable_file_url %}
+      <a class="btn btn-info"
+         href="{{ shareable_file_url }}"
+         download>
+        <i class="bi bi-file-earmark-pdf-fill"></i> Download PDF
+      </a>
+      {% else %}
+      <button class="btn btn-info" disabled title="PDF not available">
+        <i class="bi bi-file-earmark-pdf-fill"></i> Download PDF
+      </button>
+      {% endif %}
+
+      {# 4) Back to Orders #}
+      <a href="{% url 'order_management' %}" class="btn btn-secondary">
+        Back to Orders
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

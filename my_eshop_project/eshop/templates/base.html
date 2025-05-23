@@ -1,0 +1,266 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Eshop</title>
+
+  <!-- Import Roboto Slab from Google Fonts -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;700&display=swap"
+    rel="stylesheet"
+  >
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    /********************************************
+     * Mitsubishi-Inspired Color Variables
+     ********************************************/
+    :root {
+      --color-red:    #ff0000;  /* Mitsubishi Red */
+      --color-navy:   #002b49;  /* Mitsubishi Navy */
+      --color-marine: #004d8c;  /* Lighter navy accent */
+      --color-white:  #ffffff;  /* Standard White */
+      --color-mid-gray: #888888;
+      --color-light-neutral: #f0f2f5; /* Light background */
+    }
+
+    /* Apply Roboto Slab throughout the site */
+    body {
+      font-family: 'Roboto Slab', serif;
+      padding-top: 40px; /* Reserve space for the fixed red bar */
+      background-color: var(--color-light-neutral);
+    }
+
+    /* Fixed Red Top Bar - now referencing var(--color-red) */
+    .red-top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 40px;
+      background-color: var(--color-red);
+      color: var(--color-white);
+      padding: 0 10px;
+      z-index: 999;
+      display: flex;
+      align-items: center; /* vertical centering */
+      justify-content: space-between; /* icons left, phone right */
+    }
+
+    /* Social Icons (left side) */
+    .social-icons {
+      display: flex;
+      align-items: center;
+    }
+    .social-icons img {
+      width: 18px;
+      height: 18px;
+      margin-right: 8px;
+    }
+
+    /* Phone Section (right side) */
+    .phone-section {
+      display: flex;
+      align-items: center;
+    }
+    .phone-section img {
+      width: 24px;
+      height: 24px;
+      margin-right: 5px;
+    }
+
+    /* White Board Container */
+    .white-board {
+      background-color: var(--color-white);
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      padding: 15px;
+      margin-bottom: 20px;
+    }
+
+    /* Search Box Container */
+    .search-container {
+      position: relative;
+      width: 500px; /* Adjust as needed */
+      margin: 0 auto;
+    }
+    .search-input {
+      width: 100%;
+      padding: 8px 40px 8px 8px;
+      border: 2px solid #ccc;
+      border-radius: 5px;
+      outline: none;
+    }
+    .search-icon {
+      position: absolute;
+      top: 50%;
+      right: 10px;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+    }
+
+    /* Footer Container with navy background and white text */
+    .footer-white-board {
+      background-color: var(--color-navy);
+      color: var(--color-white);
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      padding: 20px;
+      margin-top: 20px;
+    }
+    .footer-white-board h5 {
+      font-weight: 600;
+      margin-bottom: 15px;
+      color: var(--color-white);
+    }
+    .footer-white-board a {
+      color: var(--color-white);
+      text-decoration: none;
+    }
+    .footer-white-board a:hover {
+      text-decoration: underline;
+    }
+    .footer-white-board .list-unstyled li {
+      margin-bottom: 8px;
+    }
+
+    /* Footer Bottom Bar - navy or dark grey as desired */
+    .footer-bottom {
+      background-color: var(--color-navy);
+      color: var(--color-white);
+      padding: 15px 0;
+      text-align: center;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Fixed Red Top Bar -->
+  <div class="red-top-bar">
+    <!-- Social Icons (left) -->
+    <div class="social-icons">
+      <a href="https://facebook.com" target="_blank">
+        <img src="{% static 'images/facebook.png' %}" alt="Facebook">
+      </a>
+      <a href="https://linkedin.com" target="_blank">
+        <img src="{% static 'images/linkedin.png' %}" alt="LinkedIn">
+      </a>
+      <a href="https://youtube.com" target="_blank">
+        <img src="{% static 'images/youtube.png' %}" alt="YouTube">
+      </a>
+      <a href="https://twitter.com" target="_blank">
+        <img src="{% static 'images/twitter.png' %}" alt="Twitter">
+      </a>
+      <a href="https://www.mitsubishielectric.com" target="_blank">
+        <img src="{% static 'images/mitsubishi.png' %}" alt="Mitsubishi">
+      </a>
+      <a href="https://wa.me/XXXXXXXXXXX" target="_blank">
+        <img src="{% static 'images/whatsapp.png' %}" alt="WhatsApp">
+      </a>
+    </div>
+    <!-- Phone Icon + Number (right) -->
+    <div class="phone-section">
+      <img src="{% static 'images/phone.png' %}" alt="Phone Icon">
+      <strong>+880 1329-721616</strong>
+    </div>
+  </div>
+
+  <!-- Navbar (white board) -->
+  <div class="container mt-4">
+    <div class="white-board">
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+          <!-- Bold, Larger Brand Text -->
+          <a class="navbar-brand" href="/" style="font-weight: bold; font-size: 1.5rem;">Eshop</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#navbarNav" aria-controls="navbarNav"
+                  aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Order Management Link (only visible to staff) -->
+            {% if user.is_staff %}
+              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                  <a class="nav-link" href="{% url 'order_management' %}">Order Management</a>
+                </li>
+              </ul>
+            {% endif %}
+            <!-- Centered Single-Input Search Box -->
+            <form method="GET" action="{% url 'search' %}" class="search-container">
+              <input type="text" name="q" class="search-input" placeholder="Search for...">
+              <img src="{% static 'images/search-icon.png' %}" alt="Search Icon" class="search-icon">
+            </form>
+          </div>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Main Content (white board if needed) -->
+  <div class="container">
+    <div class="white-board">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <!-- Footer in the same container for alignment -->
+  <div class="container">
+    <div class="footer-white-board">
+      <div class="row">
+        <!-- Quick Links Column -->
+        <div class="col-md-4 mb-3">
+          <h5>Quick Links</h5>
+          <ul class="list-unstyled">
+            <li><a href="https://facebook.com" target="_blank">Facebook</a></li>
+            <li><a href="https://linkedin.com" target="_blank">LinkedIn</a></li>
+            <li><a href="https://youtube.com" target="_blank">YouTube</a></li>
+            <li><a href="https://twitter.com" target="_blank">Twitter</a></li>
+            <li><a href="https://www.mitsubishielectric.com" target="_blank">Mitsubishi Electric</a></li>
+          </ul>
+        </div>
+        <!-- Address Column -->
+        <div class="col-md-4 mb-3">
+          <h5>Address</h5>
+          <p class="mb-1">
+            Suite: E3A, House: 567-568, Road: 9, Avenue: 3, <br>
+            DOHS Mirpur, Dhaka-1216
+          </p>
+          <p class="mb-1">
+            Service Center: 85/2, Borobag, Mirpur-02, <br>
+            Dhaka-1216
+          </p>
+          <p class="mb-1">
+            info@sisl-bd.com
+          </p>
+          <p class="mb-1">
+            <a href="https://goo.gl/maps/xyz" target="_blank">Location (Google Map)</a>
+          </p>
+        </div>
+        <!-- Contact Us Column -->
+        <div class="col-md-4 mb-3">
+          <h5>Contact Us</h5>
+          <p class="mb-1">Hot Line: +880-1329-721616</p>
+          <p class="mb-1">Admin & HR: +880-1329-721610 - 09</p>
+          <p class="mb-1">Sales & Service: +880-1329-721610 - 20</p>
+          <p class="mb-1">FA Center: +880-1329-721610 - 25</p>
+          <p class="mb-1">Projects & Pre-order: +880-1329-721610 - 29</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Bottom Bar -->
+  <div class="footer-bottom" style="background-color: var(--color-navy); color: var(--color-white); padding: 15px 0; text-align: center; margin-top: 20px;">
+    <small>&copy; MITSUBISHI FA BD - 2025 | All Rights Reserved</small>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+{% load widget_tweaks %}
+{% block content %}
+<div class="container mt-4">
+  <h1 class="text-center mb-4">New Discount Request</h1>
+
+  <!-- Display general form errors (non-field errors) for the header_form -->
+  {% if header_form.non_field_errors %}
+    <div class="alert alert-danger">
+      <ul>
+        {% for error in header_form.non_field_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <!-- Display general form errors for the formset -->
+  {% if formset.non_form_errors %}
+    <div class="alert alert-danger">
+      <ul>
+        {% for error in formset.non_form_errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <form method="POST">
+    {% csrf_token %}
+
+    <!-- Quotation Header -->
+    <h4>Quotation Header</h4>
+    <div class="row mb-3">
+      <div class="col-md-6">
+        {{ header_form.customer_name.label_tag }}
+        {{ header_form.customer_name|add_class:"form-control" }}
+        {% for error in header_form.customer_name.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+      <div class="col-md-6">
+        {{ header_form.phone_no.label_tag }}
+        {{ header_form.phone_no|add_class:"form-control" }}
+        {% for error in header_form.phone_no.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- NEW ROW: Email and Delivery Address -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        {{ header_form.email.label_tag }}
+        {{ header_form.email|add_class:"form-control" }}
+        {% for error in header_form.email.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+      <div class="col-md-6">
+        {{ header_form.delivery_address.label_tag }}
+        {{ header_form.delivery_address|add_class:"form-control" }}
+        {% for error in header_form.delivery_address.errors %}
+          <div class="text-danger">{{ error }}</div>
+        {% endfor %}
+      </div>
+    </div>
+    <!-- /NEW ROW -->
+
+    <!-- Inline Formset Management Form -->
+    {{ formset.management_form }}
+
+    <h4>Line Items</h4>
+    <table class="table table-bordered" id="line-items-table">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Description</th>
+          <th class="text-center">Quantity</th>
+          <th class="text-end">Unit Price</th>
+          <th class="text-center">Discount (%)</th>
+          {% if formset.can_delete %}
+            <th>Remove</th>
+          {% endif %}
+        </tr>
+      </thead>
+      <tbody id="formset-body">
+        {% for form in formset %}
+          <tr>
+            <td>
+              {{ form.id }}
+              {{ form.product|add_class:"form-select product-select" }}
+              {% for error in form.product.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            </td>
+            <td>
+              {{ form.description|add_class:"form-control" }}
+              {% for error in form.description.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            </td>
+            <td class="text-center">
+              {{ form.quantity|add_class:"form-control quantity-input" }}
+              {% for error in form.quantity.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            </td>
+            <td class="text-end">
+              {{ form.unit_price|add_class:"form-control unit-price-input" }}
+              {% for error in form.unit_price.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            </td>
+            <td class="text-center">
+              {{ form.discount_percent|add_class:"form-control discount-input" }}
+              {% for error in form.discount_percent.errors %}
+                <div class="text-danger">{{ error }}</div>
+              {% endfor %}
+            </td>
+            {% if formset.can_delete %}
+              <td class="text-center">
+                {{ form.DELETE }}
+              </td>
+            {% endif %}
+          </tr>
+          {% if form.non_field_errors %}
+            <tr>
+              <td colspan="6">
+                <div class="alert alert-danger">
+                  <ul>
+                    {% for error in form.non_field_errors %}
+                      <li>{{ error }}</li>
+                    {% endfor %}
+                  </ul>
+                </div>
+              </td>
+            </tr>
+          {% endif %}
+        {% endfor %}
+      </tbody>
+    </table>
+
+    <button type="button" class="btn btn-secondary mb-3" id="add-line-btn">Add Another Line</button>
+
+    <div class="text-end mb-3">
+      <strong>Total: </strong><span id="grand-total">0.00</span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Quotation</button>
+  </form>
+</div>
+
+<!-- Hidden template row for new lines -->
+<table style="display:none;">
+  <tbody>
+    <tr id="empty-form-row">
+      <td>
+        {{ formset.empty_form.id }}
+        {{ formset.empty_form.product|add_class:"form-select product-select" }}
+      </td>
+      <td>{{ formset.empty_form.description|add_class:"form-control" }}</td>
+      <td class="text-center">{{ formset.empty_form.quantity|add_class:"form-control quantity-input" }}</td>
+      <td class="text-end">{{ formset.empty_form.unit_price|add_class:"form-control unit-price-input" }}</td>
+      <td class="text-center">{{ formset.empty_form.discount_percent|add_class:"form-control discount-input" }}</td>
+      {% if formset.can_delete %}
+        <td class="text-center">
+          {{ formset.empty_form.DELETE }}
+        </td>
+      {% endif %}
+    </tr>
+  </tbody>
+</table>
+
+<script>
+  // Helper function to format numbers in Indian format
+  function formatIndian(num) {
+      return num.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  // Parse the JSON mapping of product IDs to original prices
+  const productPrices = {{ product_prices_json|safe }};
+  console.log("Product Prices mapping:", productPrices);
+
+  function recalcTotal() {
+      let total = 0;
+      document.querySelectorAll("#formset-body tr").forEach(row => {
+          const qty = parseFloat(row.querySelector("input.quantity-input")?.value) || 0;
+          const price = parseFloat(row.querySelector("input.unit-price-input")?.value) || 0;
+          const discount = parseFloat(row.querySelector("input.discount-input")?.value) || 0;
+          const lineTotal = qty * price;
+          const discountAmount = lineTotal * (discount / 100);
+          total += (lineTotal - discountAmount);
+      });
+      document.getElementById("grand-total").textContent = formatIndian(total);
+  }
+
+  function initializeRow(row) {
+      console.log("Initializing row:", row);
+      const productSelect = row.querySelector(".product-select");
+      const priceInput = row.querySelector(".unit-price-input");
+      if (productSelect && priceInput) {
+          // Auto-fill price if a product is selected
+          productSelect.addEventListener("change", function() {
+              const prodId = this.value;
+              if (prodId && productPrices[prodId]) {
+                  priceInput.value = productPrices[prodId];
+                  console.log("Updated price on change:", productPrices[prodId]);
+              }
+              recalcTotal();
+          });
+      }
+  }
+
+  // Initialize existing rows on page load
+  document.querySelectorAll("#formset-body tr").forEach(row => {
+      initializeRow(row);
+  });
+
+  // Handle "Add Another Line" button click
+  const totalFormsInput = document.getElementById("id_lines-TOTAL_FORMS");
+  document.getElementById("add-line-btn").addEventListener("click", function() {
+      const formIndex = parseInt(totalFormsInput.value);
+      const emptyRow = document.getElementById("empty-form-row");
+      const newRow = emptyRow.cloneNode(true);
+      newRow.removeAttribute("id");
+      newRow.style.display = "";
+
+      // Replace __prefix__ with the current formIndex
+      const regex = new RegExp('__prefix__', 'g');
+      newRow.innerHTML = newRow.innerHTML.replace(regex, formIndex);
+
+      document.getElementById("formset-body").appendChild(newRow);
+
+      totalFormsInput.value = formIndex + 1;
+      initializeRow(newRow);
+      recalcTotal();
+  });
+
+  // Recalculate total on input changes
+  document.getElementById("formset-body").addEventListener("input", function(e) {
+      if (e.target.matches("input.quantity-input, input.unit-price-input, input.discount-input")) {
+          recalcTotal();
+      }
+  });
+
+  // Initial calculation
+  recalcTotal();
+</script>
+{% endblock %}
